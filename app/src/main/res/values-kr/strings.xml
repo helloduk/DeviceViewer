@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="machine_state">장비 상태</string>
+    <string name="machine_state_working">가동중</string>
+    <string name="machine_state_not_working">중지</string>
+    <string name="passed_counts">양품 수량</string>
+    <string name="failed_counts">불량 수량</string>
+    <string name="total_counts">총 생산 수량</string>
+    <string name="passed_percentage">양품률 (%)</string>
+</resources>

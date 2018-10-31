@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">SolluzViewer</string>
+    <string name="machine_state">Machine state</string>
+    <string name="machine_state_working">Working</string>
+    <string name="machine_state_not_working">Stoped</string>
+    <string name="passed_counts">Passed counts</string>
+    <string name="failed_counts">Failed counts</string>
+    <string name="total_counts">Total counts</string>
+    <string name="passed_percentage">Passed percentage (%)</string>
+    <string name="home_url">http://www.solluz-fa.com</string>
+</resources>

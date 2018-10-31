@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="device_name_height">80dp</dimen>
+    <dimen name="state_height">70dp</dimen>
+    <dimen name="item_height">60dp</dimen>
+    <dimen name="item_value_height">40dp</dimen>
+    <dimen name="item_margin">5dp</dimen>
+</resources>
