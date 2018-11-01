@@ -1,24 +1,29 @@
 package com.solluzfa.solluzviewer.viewmodel
 
+import android.arch.lifecycle.*
 import com.solluzfa.solluzviewer.model.MachineData
-import com.solluzfa.solluzviewer.model.update
 
-class DeviceViewerViewModel : ViewModel {
-    lateinit var model : MachineData
+class DeviceViewerViewModel : ViewModel(), LifecycleObserver {
+    lateinit var model: MachineData
+    val nameNotifier = MutableLiveData<String>()
+    val stateNotifier = MutableLiveData<Boolean>()
+    val passedNotifier = MutableLiveData<Int>()
+    val failedNotifier = MutableLiveData<Int>()
+    val totalNotifier = MutableLiveData<Int>()
+    val passedPercentageNotifier = MutableLiveData<Float>()
 
-    override fun onCreate() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
+    fun onCreate() {
+        model = MachineData(nameNotifier, stateNotifier, passedNotifier, failedNotifier, totalNotifier, passedPercentageNotifier)
     }
 
-    override fun onResume() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
+    fun onResume() {
+        model.showState()
     }
 
-    override fun onPause() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun onDestroy() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+    fun onPause() {
+        model.clear()
     }
 }
