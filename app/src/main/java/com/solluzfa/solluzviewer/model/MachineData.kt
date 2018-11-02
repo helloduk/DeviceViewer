@@ -6,7 +6,9 @@ import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.android.schedulers.AndroidSchedulers
-import java.io.File
+import java.net.URL
+import java.net.URLDecoder
+import java.net.URLEncoder
 import java.util.concurrent.TimeUnit
 
 
@@ -15,37 +17,56 @@ class MachineData(var name: MutableLiveData<String>, var state: MutableLiveData<
                   var total: MutableLiveData<Int>, var passPercentage: MutableLiveData<Float>) {
     private val TAG = "MachineData"
     private val RETRY_COUNT = 10L
+    private val ERROR_PACKET = "N:File error,S:N,G:1,N:1"
 
     lateinit var disposable: Disposable
 
-    fun showState() {
-        disposable = Observable.interval(1, TimeUnit.SECONDS)
+    var dataObservable : Observable<String>
+
+    init {
+        val UrlAddress = URL("http://solluz.iptime.org/Data/MachineData1.txt");
+
+        dataObservable = Observable.interval(1, TimeUnit.SECONDS)
                 .subscribeOn(Schedulers.io())
                 .switchMap { _ ->
-                    Observable.fromIterable(File("http://solluz.iptime.org/Data/MachineData1.txt").useLines { it.toList() })
-                            .take(1)
+                    Observable.just(UrlAddress.readText(Charsets.UTF_8))
                 }
-                .retry(RETRY_COUNT)
-                .onErrorReturn { e ->
+                .doOnError {e -> run {
                     Log.e(TAG, e.toString())
-                    "N:File error,S:N,G:1,N:1"
-                }
+                    Observable.just(ERROR_PACKET)
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(this::update)
+                }}
+                .retry()
                 .doOnNext { data -> Log.i(TAG, data) }
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::update)
+    }
+
+    fun showState() {
+        Log.i(TAG, "showState")
+        disposable = dataObservable.subscribe(this::update)
     }
 
     private fun update(packet: String) {
+        Log.i(TAG, "update : " + packet)
         //N:Solluz 비전 검사 장비,S:Y,G:100,N:2
         val datas = packet.split(",")
-        val passedValue = datas[2].substringAfterLast(":").toInt()
-        val failedValue = datas[3].substringAfterLast(":").toInt()
-        name.value = datas[0].substringAfterLast(":")
-        state.value = datas[1].substringAfterLast(":").equals("Y")
-        passed.value = passedValue
-        failed.value = failedValue
-        total.value = passedValue + failedValue
-        passPercentage.value = passedValue.toFloat() * 100 / (passedValue + failedValue)
+        if(datas.size >= 4) {
+            try {
+                val passedValue = datas[2].substringAfterLast(":").toInt()
+                val failedValue = datas[3].substringAfterLast(":").toInt()
+                name.value = datas[0].substringAfterLast(":")
+                state.value = datas[1].substringAfterLast(":").equals("Y")
+                passed.value = passedValue
+                failed.value = failedValue
+                total.value = passedValue + failedValue
+                passPercentage.value = passedValue.toFloat() * 100 / (passedValue + failedValue)
+            } catch(e : Exception) {
+                Log.e(TAG, "Invalid type ${e.toString()}");
+            }
+        } else {
+            Log.e(TAG, "Invalid type");
+        }
     }
 
     fun clear() {

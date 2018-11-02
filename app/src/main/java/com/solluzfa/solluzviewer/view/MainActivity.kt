@@ -4,6 +4,7 @@ import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import com.solluzfa.solluzviewer.R
 import com.solluzfa.solluzviewer.viewmodel.DeviceViewerViewModel
 import kotlinx.android.synthetic.main.activity_main.*
@@ -44,5 +45,10 @@ class MainActivity : AppCompatActivity() {
         mViewModel.failedNotifier.observe(this, failedChangedObserver)
         mViewModel.totalNotifier.observe(this, totalChangedObserver)
         mViewModel.passedPercentageNotifier.observe(this, passedPercentageObserver)
+        val file_name = "machinedata.txt"
+        val json_string = application.assets.open(file_name).bufferedReader().use{
+            it.readText()
+        }
+        Log.i("MachineViewer", json_string)
     }
 }
