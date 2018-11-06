@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">SolluzViewer</string>
+    <string name="app_name">Solluz FA\nViewer</string>
     <string name="machine_state">Machine state</string>
     <string name="machine_state_working">Working</string>
     <string name="machine_state_not_working">Stoped</string>
