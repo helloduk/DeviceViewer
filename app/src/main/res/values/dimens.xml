@@ -5,4 +5,5 @@
     <dimen name="item_height">60dp</dimen>
     <dimen name="item_value_height">40dp</dimen>
     <dimen name="item_margin">5dp</dimen>
+    <dimen name="text_margin">16dp</dimen>
 </resources>

@@ -8,4 +8,37 @@
     <string name="total_counts">Total counts</string>
     <string name="passed_percentage">Passed percentage (%)</string>
     <string name="home_url">http://www.solluz-fa.com</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Strings related to Settings -->
+
+    <!-- Example General settings -->
+    <string name="pref_header_general">General</string>
+
+    <string name="pref_title_push_notification">Push notification</string>
+    <string name="pref_description_push_notification">make push notification when you turn on
+    </string>
+
+    <string name="pref_title_url_address">URL address</string>
+    <string name="pref_default_url_address">solluz.iptime.org/Data/</string>
+
+    <string name="pref_title_company_code">Company code</string>
+    <string name="pref_default_company_code">MachineData2</string>
+
+
+    <string name="pref_title_select_interval">Reading interval</string>
+    <string-array name="pref_list_reading_interval_titles">
+        <item>None</item>
+        <item>1 sec</item>
+        <item>1 min </item>
+        <item>1 hour</item>
+        <item>3 hours</item>
+    </string-array>
+    <string-array name="pref_list_reading_interval_values">
+        <item>0</item>
+        <item>1000</item>
+        <item>60000</item>
+        <item>3600000</item>
+        <item>10800000</item>
+    </string-array>
 </resources>

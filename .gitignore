@@ -65,3 +65,8 @@
 .idea/vcs.xml
 .idea/workspace.xml
 DeviceViewer.iml
+.idea/libraries/Gradle__com_android_support_cardview_v7_28_0_0.xml
+.idea/libraries/Gradle__com_android_support_recyclerview_v7_28_0_0.xml
+.idea/libraries/Gradle__com_android_support_support_media_compat_28_0_0.xml
+.idea/libraries/Gradle__com_android_support_support_v4_28_0_0.xml
+app/app.iml
