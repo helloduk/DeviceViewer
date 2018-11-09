@@ -10,6 +10,7 @@ class DeviceViewerViewModel : ViewModel(), LifecycleObserver {
     }
     val model = MachineData
     val dataNotifier = MutableLiveData<String>()
+    val pushNotifier = MutableLiveData<String>()
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun onCreate() {
@@ -19,7 +20,7 @@ class DeviceViewerViewModel : ViewModel(), LifecycleObserver {
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
     fun onResume() {
         Log.i(TAG,"OnResume")
-        model.showState(this::update)
+        model.showState(this::dataUpdate, this::pushUpdate)
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
@@ -28,8 +29,13 @@ class DeviceViewerViewModel : ViewModel(), LifecycleObserver {
         model.clear()
     }
 
-    fun update(data:String) {
-        Log.i(TAG,data)
+    fun dataUpdate(data:String) {
+        Log.i(TAG,"dataUpdate : $data")
         dataNotifier.value = data
+    }
+
+    fun pushUpdate(data:String) {
+        Log.i(TAG, "pushUpdate : $data")
+        pushNotifier.value = data
     }
 }

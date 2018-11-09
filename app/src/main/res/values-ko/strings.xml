@@ -11,8 +11,6 @@
     <string name="title_activity_settings">설정</string>
 
     <!-- Strings related to Settings -->
-
-    <!-- Example General settings -->
     <string name="pref_title_push_notification">Push notification</string>
     <string name="pref_description_push_notification">Push Notification을 표시합니다
     </string>

@@ -10,11 +10,11 @@
     <string name="home_url">http://www.solluz-fa.com</string>
     <string name="title_activity_settings">Settings</string>
 
+    <!-- Preference -->
+    <string name="solluz_preference_name">com.solluzfa.solluzfaviewer.pref</string>
+    <string name="channel_register_pref">Channel_Register</string>
+
     <!-- Strings related to Settings -->
-
-    <!-- Example General settings -->
-    <string name="pref_header_general">General</string>
-
     <string name="pref_title_push_notification">Push notification</string>
     <string name="pref_description_push_notification">make push notification when you turn on
     </string>

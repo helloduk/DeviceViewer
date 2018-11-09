@@ -25,7 +25,7 @@
         android:layout_below="@+id/device_name"
         android:layout_centerHorizontal="true"
         app:layoutManager="LinearLayoutManager"
-        tools:context=".view.MainActivity"
+        tools:context=".view.MainFragment"
         tools:listitem="@layout/list_item" />
 
     <LinearLayout
