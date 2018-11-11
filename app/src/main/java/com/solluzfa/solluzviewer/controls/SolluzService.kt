@@ -13,11 +13,16 @@ class SolluzService : Service() {
     val notificationManager = NotificationManager.getInstance()
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        Log.i(TAG, "onStartCommand")
+        Log.i(TAG, "onStartCommand " + intent!!.action)
         when(intent!!.action) {
             InjectorUtils.STOP_SERVICE -> {
                 solluzManager.stopMonitoring()
                 stopSelf()
+                android.os.Process.killProcess(android.os.Process.myPid());
+                System.exit(1);
+            }
+            InjectorUtils.UPDATE_SETTINGS -> {
+                solluzManager.updateSetting()
             }
             else -> {
                 startForeground(1, notificationManager.getMonitoringNotification())

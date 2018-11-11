@@ -130,6 +130,11 @@ class MachineData private constructor(){
     fun showState(ds: (String) -> Unit, ps: (String) -> Unit) {
         Log.i(TAG, "showState")
         clear()
+        if(interval == 0L) {
+            Log.i(TAG, "Do not update. Interval is None")
+            return
+        }
+
         dataSubscriber = ds
         pushSubscriber = ps
         // SAM(Single Abstract Method) ambiguity issue.

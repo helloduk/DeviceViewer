@@ -4,19 +4,13 @@ import android.annotation.TargetApi
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
-import android.media.RingtoneManager
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.preference.ListPreference
-import android.preference.Preference
-import android.preference.PreferenceActivity
-import android.preference.PreferenceFragment
-import android.preference.PreferenceManager
-import android.preference.RingtonePreference
-import android.text.TextUtils
+import android.preference.*
 import android.view.MenuItem
 import com.solluzfa.solluzviewer.R
+import com.solluzfa.solluzviewer.controls.SolluzService
+import com.solluzfa.solluzviewer.utils.InjectorUtils
 
 /**
  * A [PreferenceActivity] that presents a set of application settings. On
@@ -34,6 +28,12 @@ class SettingsActivity : AppCompatPreferenceActivity() {
         super.onCreate(savedInstanceState)
         setupActionBar()
         fragmentManager.beginTransaction().replace(android.R.id.content, GeneralPreferenceFragment()).commit()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        val intent = Intent(this, SolluzService::class.java).also { it.action = InjectorUtils.UPDATE_SETTINGS }
+        startService(intent)
     }
 
     /**
@@ -113,7 +113,7 @@ class SettingsActivity : AppCompatPreferenceActivity() {
                 val listPreference = preference
                 val index = listPreference.findIndexOfValue(stringValue)
 
-                // Set the summary to reflect the new value.
+                // Se  t the summary to reflect the new value.
                 preference.setSummary(
                         if (index >= 0)
                             listPreference.entries[index]

@@ -10,4 +10,5 @@ object InjectorUtils {
         return DeviceViewerViewModelFactory(solluzManager)
     }
     val STOP_SERVICE = "stop_service"
+    val UPDATE_SETTINGS = "update_settings"
 }

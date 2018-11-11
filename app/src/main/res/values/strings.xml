@@ -15,7 +15,13 @@
     <string name="solluz_preference_name">com.solluzfa.solluzfaviewer.pref</string>
     <string name="channel_register_pref">Channel_Register</string>
 
+
     <!-- Strings related to Settings -->
+    <string name="pref_key_url_text">url_text</string>
+    <string name="pref_key_company_code_text">company_code_text</string>
+    <string name="pref_key_interval_list">interval_list</string>
+    <string name="pref_key_push_switch">push_switch</string>
+
     <string name="pref_title_push_notification">Push notification</string>
     <string name="pref_description_push_notification">make push notification when you turn on
     </string>

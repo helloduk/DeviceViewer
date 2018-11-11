@@ -13,6 +13,7 @@ import android.support.v4.app.NotificationManagerCompat
 import android.widget.RemoteViews
 import com.solluzfa.solluzviewer.R
 import com.solluzfa.solluzviewer.SolluzApplication
+import com.solluzfa.solluzviewer.utils.InjectorUtils
 import com.solluzfa.solluzviewer.view.MainActivity
 
 
@@ -77,13 +78,14 @@ class NotificationManager private constructor() {
                 R.layout.remoteview_layout
         ).apply {
             val intent = Intent(context, SolluzService::class.java)
+            intent.action = InjectorUtils.STOP_SERVICE
             val pendingIntent: PendingIntent = PendingIntent.getService(context, 0, intent, 0)
             setOnClickPendingIntent(R.id.cancel_monitoring, pendingIntent)
         }
         val mBuilder = NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_solluzfa)
                 .setContent(remoteViews)
-                .setDefaults(Notification.DEFAULT_LIGHTS or Notification.DEFAULT_SOUND or Notification.DEFAULT_VIBRATE)
+                .setSound(null)
                 .setContentIntent(pendingIntent)
         return mBuilder.build()
     }

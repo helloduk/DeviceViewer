@@ -2,7 +2,10 @@ package com.solluzfa.solluzviewer.controls
 
 import android.arch.lifecycle.Lifecycle
 import android.arch.lifecycle.MutableLiveData
+import android.content.SharedPreferences
+import android.preference.PreferenceManager
 import android.util.Log
+import com.solluzfa.solluzviewer.SolluzApplication
 import com.solluzfa.solluzviewer.model.MachineData
 import java.text.SimpleDateFormat
 
@@ -23,6 +26,17 @@ class SolluzManager private constructor(val machineData: MachineData) {
 
     fun startMoritoring() = machineData.showState(this::dataUpdated, this::pushUpdated)
     fun stopMonitoring() = machineData.clear()
+    fun updateSetting() {
+        val pref = PreferenceManager.getDefaultSharedPreferences(SolluzApplication.context())
+        val address = pref.getString("pref_key_url_text", "http://solluz.iptime.org/Data/")
+        val code = pref.getString("pref_key_company_code_text", "MachineData2")
+        val time = pref.getString("pref_key_interval_list", "1000").toLong()
+        val push = pref.getBoolean("pref_key_push_switch", true)
+
+        Log.i(TAG, "updateSetting : $address, $code, $time, $push")
+        machineData.updateSetting(address,code,time,push)
+        startMoritoring()
+    }
 
     val data = MutableLiveData<String>()
     val push = MutableLiveData<String>()

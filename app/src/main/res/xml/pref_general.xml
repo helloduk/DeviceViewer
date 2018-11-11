@@ -4,7 +4,7 @@
         android:capitalize="words"
         android:defaultValue="@string/pref_default_url_address"
         android:inputType="textCapWords"
-        android:key="url_text"
+        android:key="@string/pref_key_url_text"
         android:maxLines="1"
         android:selectAllOnFocus="true"
         android:singleLine="true"
@@ -14,24 +14,24 @@
         android:capitalize="words"
         android:defaultValue="@string/pref_default_company_code"
         android:inputType="textCapWords"
-        android:key="company_code_text"
+        android:key="@string/pref_key_company_code_text"
         android:maxLines="1"
         android:selectAllOnFocus="true"
         android:singleLine="true"
         android:title="@string/pref_title_company_code" />
 
     <ListPreference
-        android:defaultValue="-1"
         android:entries="@array/pref_list_reading_interval_titles"
         android:entryValues="@array/pref_list_reading_interval_values"
-        android:key="interval_list"
+        android:key="@string/pref_key_interval_list"
         android:negativeButtonText="@null"
         android:positiveButtonText="@null"
+        android:defaultValue="1000"
         android:title="@string/pref_title_select_interval" />
 
     <SwitchPreference
         android:defaultValue="true"
-        android:key="push_switch"
+        android:key="@string/pref_key_push_switch"
         android:summary="@string/pref_description_push_notification"
         android:title="@string/pref_title_push_notification" />
 
