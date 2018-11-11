@@ -3,14 +3,16 @@ package com.solluzfa.solluzviewer.viewmodel
 import android.arch.lifecycle.*
 import android.util.Log
 import com.solluzfa.solluzviewer.model.MachineData
+import com.solluzfa.solluzviewer.controls.NotificationManager
+import com.solluzfa.solluzviewer.controls.SolluzManager
+import java.text.SimpleDateFormat
 
-class DeviceViewerViewModel : ViewModel(), LifecycleObserver {
+class DeviceViewerViewModel (private val solluzManager: SolluzManager) : ViewModel(), LifecycleObserver {
     companion object {
         val TAG = DeviceViewerViewModel::class.java.simpleName
     }
-    val model = MachineData
-    val dataNotifier = MutableLiveData<String>()
-    val pushNotifier = MutableLiveData<String>()
+    fun getData() = solluzManager.data
+    fun getPush() = solluzManager.push
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun onCreate() {
@@ -20,22 +22,17 @@ class DeviceViewerViewModel : ViewModel(), LifecycleObserver {
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
     fun onResume() {
         Log.i(TAG,"OnResume")
-        model.showState(this::dataUpdate, this::pushUpdate)
+        solluzManager.state = Lifecycle.State.RESUMED
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
     fun onPause() {
         Log.i(TAG,"OnPause")
-        model.clear()
+        solluzManager.state = Lifecycle.State.STARTED
     }
 
-    fun dataUpdate(data:String) {
-        Log.i(TAG,"dataUpdate : $data")
-        dataNotifier.value = data
-    }
-
-    fun pushUpdate(data:String) {
-        Log.i(TAG, "pushUpdate : $data")
-        pushNotifier.value = data
+    override fun onCleared() {
+        super.onCleared()
+        solluzManager.state = Lifecycle.State.DESTROYED
     }
 }

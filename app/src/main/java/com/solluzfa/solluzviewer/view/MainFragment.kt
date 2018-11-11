@@ -3,7 +3,6 @@ package com.solluzfa.solluzviewer.view
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
-import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -16,11 +15,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.solluzfa.solluzviewer.R
+import com.solluzfa.solluzviewer.utils.InjectorUtils
 
 import com.solluzfa.solluzviewer.viewmodel.DeviceViewerViewModel
 import kotlinx.android.synthetic.main.captionlist_layout.*
 import kotlinx.android.synthetic.main.captionlist_layout.view.*
-import kotlinx.android.synthetic.main.list_item.view.*
+import java.text.SimpleDateFormat
 import java.util.ArrayList
 
 /**
@@ -35,31 +35,19 @@ class MainFragment : Fragment() {
     private val items: MutableList<Item> = ArrayList()
 
     private val mViewModel: DeviceViewerViewModel by lazy {
-        ViewModelProviders.of(this).get(DeviceViewerViewModel::class.java)
+        ViewModelProviders.of(this, InjectorUtils.provideDeviceViewerViewModelFactory()).get(DeviceViewerViewModel::class.java)
     }
     data class Item(var tt: String, var tb: Int, var tf: Int, var ta: Int, var ct: String, var cb: Int, var cf: Int)
 
     private val dataChangedListener = Observer<String> { it?.let { updateView(it) } }
     private val pushChangedListener = Observer<String> { it?.let { pushUpdateView(it) } }
 
-    private val notificationManager : NotificationManager by lazy {
-        NotificationManager(context!!)
-    }
-    private var previousNotificationTime : String = ""
-
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.i(TAG, "OnCreate")
         super.onCreate(savedInstanceState)
         lifecycle.addObserver(mViewModel)
-        mViewModel.dataNotifier.observe(this, dataChangedListener)
-        mViewModel.pushNotifier.observe(this, pushChangedListener)
-
-        // make notification channel only one time
-        val sharedPreferences = context?.getSharedPreferences(context?.getString(R.string.solluz_preference_name),0)
-        if(!sharedPreferences!!.getBoolean(context?.getString(R.string.channel_register_pref), false)) {
-            notificationManager.creteNotificationChannel()
-            sharedPreferences.edit().putBoolean(context!!.getString(R.string.channel_register_pref), true).commit()
-        }
+        mViewModel.getData().observe(this, dataChangedListener)
+        mViewModel.getPush().observe(this, pushChangedListener)
 
         arguments?.let {
             columnCount = it.getInt(ARG_COLUMN_COUNT)
@@ -86,16 +74,10 @@ class MainFragment : Fragment() {
 
     private fun pushUpdateView(data: String) {
         val datas = data.split(",");
-
         datas?.let {
-            val time = datas[0]?.substringAfterLast(":")
-            val content = datas[1]?.substringAfterLast(":")
-
-            if (!previousNotificationTime.equals(time)) {
-                Log.i(TAG, "make push Notification : $time $content")
-                notificationManager.makeNotification(content, time)
-                previousNotificationTime = time
-            }
+            val time = datas[0]
+            val content = datas[1]
+            push_view_value.text = "$time  $content"
         }
     }
 

@@ -19,15 +19,23 @@ import java.util.concurrent.Callable
 import java.util.concurrent.TimeUnit
 
 
-object MachineData {
-    private val TAG = "MachineData"
+class MachineData private constructor(){
+    companion object {
+        private val TAG = "MachineData"
 
+        @Volatile private var instance : MachineData? = null
+
+        fun getInstance() = instance ?: synchronized(this) {
+            MachineData().also { instance = it }
+        }
+    }
     //Example
     //Row:4,TT1:Text1,TB1:255255255,TF1:000000000,TT2:Text2,TB2:243175175,TF2:000000000,TT3:Text3,TB3:255255255,TF3:000000000,TT4:Text4,TB4:255255255,TF4:000000000
     //Name:Title Text,Row:4,CT1:Caption1,CB1:011097019,CF1:255255255,TA1:Right,CT2:Caption2,CB2:164020020,CF2:255255255,TA2:Left,CT3:Caption3,CB3:052118232,CF3:000000000,TA3:Center,CT4:Caption4,CB4:023108097,CF4:255255255,TA4:Center
     private val DATA_ERROR_PACKET = "Row:1,TT1:Error,TB1:255000000,TF1:000000255"
     private val LAYOUT_ERROR_PACKET = "Name:File Read Error,Row:1,CT1:Error,CB1:050050050,CF1:000000000,TA1:Right"
     private val ERROR_PACKET = "$DATA_ERROR_PACKET;$LAYOUT_ERROR_PACKET"
+    private val PUSH_ERROR_PACKET = "Time:20180101000000,Data:Push Error"
 
     private var DataAddress = URL("http://solluz.iptime.org/Data/MachineData2.txt");
     private var LayoutAddress = URL("http://solluz.iptime.org/Data/MachineData2_Layout.txt");
@@ -45,9 +53,9 @@ object MachineData {
     private var interval: Long = 1000
     private var pushOn: Boolean = true
 
-    val dObservable = Observable.defer { getDataObservable() }
-    val lObservale = Observable.defer { getLayoutObservable() }
-    val pObservale = Observable.defer { getPushObservable() }
+    private val dObservable = Observable.defer { getDataObservable() }
+    private val lObservale = Observable.defer { getLayoutObservable() }
+    private val pObservale = Observable.defer { getPushObservable() }
 
     private fun getDataObservable(): Observable<String> {
         return Observable.interval(interval, TimeUnit.MILLISECONDS)
@@ -59,7 +67,7 @@ object MachineData {
                 }
                 .doOnError { e ->
                     run {
-                        Log.e(TAG, e.toString())
+                        e.printStackTrace()
                         Observable.just(ERROR_PACKET)
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe(dataSubscriber)
@@ -80,7 +88,7 @@ object MachineData {
                 }
                 .doOnError { e ->
                     run {
-                        Log.e(TAG, e.toString())
+                        e.printStackTrace()
                         Observable.just(ERROR_PACKET)
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe(dataSubscriber)
@@ -101,8 +109,8 @@ object MachineData {
                 }
                 .doOnError { e ->
                     run {
-                        Log.e(TAG, e.toString())
-                        Observable.just(ERROR_PACKET)
+                        e.printStackTrace()
+                        Observable.just(PUSH_ERROR_PACKET)
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe(pushSubscriber)
                     }
@@ -121,6 +129,7 @@ object MachineData {
 
     fun showState(ds: (String) -> Unit, ps: (String) -> Unit) {
         Log.i(TAG, "showState")
+        clear()
         dataSubscriber = ds
         pushSubscriber = ps
         // SAM(Single Abstract Method) ambiguity issue.
@@ -130,28 +139,6 @@ object MachineData {
                 .subscribe(dataSubscriber)
         pushDisposable = pObservale.subscribe(pushSubscriber)
     }
-
-//    private fun update(packet: String) {
-//        Log.i(TAG, "update : " + packet)
-//        //N:Solluz 비전 검사 장비,S:Y,G:100,N:2
-//        val datas = packet.split(",")
-//        if(datas.size >= 4) {
-//            try {
-//                val passedValue = datas[2].substringAfterLast(":").toInt()
-//                val failedValue = datas[3].substringAfterLast(":").toInt()
-//                name.value = datas[0].substringAfterLast(":")
-//                state.value = datas[1].substringAfterLast(":").equals("Y")
-//                passed.value = passedValue
-//                failed.value = failedValue
-//                total.value = passedValue + failedValue
-//                passPercentage.value = passedValue.toFloat() * 100 / (passedValue + failedValue)
-//            } catch(e : Exception) {
-//                Log.e(TAG, "Invalid type ${e.toString()}");
-//            }
-//        } else {
-//            Log.e(TAG, "Invalid type");
-//        }
-//    }
 
     fun updateSetting(address: String, code: String, time: Long, push: Boolean) {
         urlAddress = address
@@ -164,9 +151,14 @@ object MachineData {
     }
 
     fun clear() {
+        Log.i(TAG, "clear")
         if (::dataDisposable.isInitialized) {
             if (!dataDisposable.isDisposed()) dataDisposable.dispose()
         }
+        if (::pushDisposable.isInitialized) {
+            if (!pushDisposable.isDisposed()) pushDisposable.dispose()
+        }
+
         if (::dataSubscriber.isInitialized) {
             dataSubscriber = {}
         }

@@ -7,8 +7,8 @@
     <string name="failed_counts">불량 수량</string>
     <string name="total_counts">총 생산 수량</string>
     <string name="passed_percentage">양품률 (%)</string>
-
     <string name="title_activity_settings">설정</string>
+    <string name="now_monitoring">상태 감시중..</string>
 
     <!-- Strings related to Settings -->
     <string name="pref_title_push_notification">Push notification</string>
