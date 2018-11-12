@@ -48,8 +48,6 @@ class MachineData private constructor(){
     lateinit var dataSubscriber: (String) -> Unit
     lateinit var pushSubscriber: (String) -> Unit
 
-    private var urlAddress: String? = null
-    private var companyCode: String? = null
     private var interval: Long = 1000
     private var pushOn: Boolean = true
 
@@ -58,7 +56,7 @@ class MachineData private constructor(){
     private val pObservale = Observable.defer { getPushObservable() }
 
     private fun getDataObservable(): Observable<String> {
-        return Observable.interval(interval, TimeUnit.MILLISECONDS)
+        return Observable.interval(0L, interval, TimeUnit.MILLISECONDS)
                 .subscribeOn(Schedulers.io())
                 .switchMap { _ ->
                     //Original file is encoded by "euc-kr"
@@ -79,7 +77,7 @@ class MachineData private constructor(){
     }
 
     private fun getLayoutObservable(): Observable<String> {
-        return Observable.interval(interval, TimeUnit.MILLISECONDS)
+        return Observable.interval(0L, interval, TimeUnit.MILLISECONDS)
                 .subscribeOn(Schedulers.io())
                 .switchMap { _ ->
                     //Original file is encoded by "euc-kr"
@@ -100,7 +98,7 @@ class MachineData private constructor(){
     }
 
     private fun getPushObservable(): Observable<String> {
-        return Observable.interval(interval, TimeUnit.MILLISECONDS)
+        return Observable.interval(0L, interval, TimeUnit.MILLISECONDS)
                 .subscribeOn(Schedulers.io())
                 .switchMap { _ ->
                     //Original file is encoded by "euc-kr"
@@ -141,18 +139,22 @@ class MachineData private constructor(){
         // so use io.reactivex.rxkotlin.Observables
         // or zip(.., .., BiFunction<String, String,String>{.., .. -> ..})
         dataDisposable = Observables.zip(dObservable, lObservale) { data, layout -> "$data;$layout" }
-                .subscribe(dataSubscriber)
-        pushDisposable = pObservale.subscribe(pushSubscriber)
+                .subscribe(dataSubscriber){
+                    Log.e(TAG, it.message)
+                }
+        if (pushOn)
+            pushDisposable = pObservale.subscribe(pushSubscriber){
+                Log.e(TAG, it.message)
+            }
     }
 
     fun updateSetting(address: String, code: String, time: Long, push: Boolean) {
-        urlAddress = address
-        companyCode = code
-        DataAddress = URL("http://" + (if (address.last().equals("/")) address else "$address + /") + code + ".txt")
-        LayoutAddress = URL("http://" + (if (address.last().equals("/")) address else "$address + /") + code + "_Layout.txt")
-        PushAddress = URL("http://" + (if (address.last().equals("/")) address else "$address + /") + code + "_Push.txt")
+        DataAddress = URL((if (address.last().equals('/')) "$address" else "$address/") + code + ".txt")
+        LayoutAddress = URL((if (address.last().equals('/')) "$address" else "$address/") + code + "_Layout.txt")
+        PushAddress = URL((if (address.last().equals('/')) "$address" else "$address/") + code + "_Push.txt")
         interval = time
         pushOn = push
+        Log.i(TAG, "setting updated : $DataAddress, $LayoutAddress, $PushAddress, $interval $pushOn")
     }
 
     fun clear() {

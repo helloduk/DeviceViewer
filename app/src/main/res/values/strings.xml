@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">Solluz FA\nViewer</string>
+    <string name="app_name_one_line">Solluz FA Viewer</string>
     <string name="machine_state">Machine state</string>
     <string name="machine_state_working">Working</string>
     <string name="machine_state_not_working">Stoped</string>
@@ -27,7 +28,7 @@
     </string>
 
     <string name="pref_title_url_address">URL address</string>
-    <string name="pref_default_url_address">solluz.iptime.org/Data/</string>
+    <string name="pref_default_url_address">http://solluz.iptime.org/Data/</string>
 
     <string name="pref_title_company_code">Company code</string>
     <string name="pref_default_company_code">MachineData2</string>

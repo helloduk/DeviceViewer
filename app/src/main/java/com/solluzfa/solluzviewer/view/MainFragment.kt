@@ -91,10 +91,15 @@ class MainFragment : Fragment() {
         val valueData = datas[0]?.split(",")
         val layoutData = datas[1]?.split(",")
 
-        val rows = valueData?.get(0)?.substringAfterLast(":").toInt()
+        val rows = valueData?.get(0)?.substringAfterLast(":")?.toIntOrNull()
+
+        if (rows == null) {
+            device_name.text = "Wrong format"
+            return
+        }
 
         if (valueData != null && layoutData != null) {
-            device_name.text = layoutData[0].substringAfterLast(":")
+            device_name.text = layoutData[0]?.substringAfterLast(":") ?: "Parsing error"
 
             rows?.let {
                 if (items.size != rows)
@@ -102,13 +107,13 @@ class MainFragment : Fragment() {
 
                 for (i in 0 until rows) {
                     val dataItem: Item = Item(
-                            tt = valueData[1 + (i * 3)].substringAfterLast(":"),
-                            tb = parseColor(valueData[2 + (i * 3)].substringAfterLast(":")),
-                            tf = parseColor(valueData[3 + (i * 3)].substringAfterLast(":")),
-                            ct = layoutData[2 + (i * 4)].substringAfterLast(":"),
-                            cb = parseColor(layoutData[3 + (i * 4)].substringAfterLast(":")),
-                            cf = parseColor(layoutData[4 + (i * 4)].substringAfterLast(":")),
-                            ta = when (layoutData[5 + (i * 4)].substringAfterLast(":")) {
+                            tt = valueData[1 + (i * 3)]?.substringAfterLast(":"),
+                            tb = parseColor(valueData[2 + (i * 3)]?.substringAfterLast(":")),
+                            tf = parseColor(valueData[3 + (i * 3)]?.substringAfterLast(":")),
+                            ct = layoutData[2 + (i * 4)]?.substringAfterLast(":"),
+                            cb = parseColor(layoutData[3 + (i * 4)]?.substringAfterLast(":")),
+                            cf = parseColor(layoutData[4 + (i * 4)]?.substringAfterLast(":")),
+                            ta = when (layoutData[5 + (i * 4)]?.substringAfterLast(":")) {
                                 "Right" -> Gravity.RIGHT.or(Gravity.CENTER_VERTICAL)
                                 "Left" -> Gravity.LEFT.or(Gravity.CENTER_VERTICAL)
                                 "Center" -> Gravity.CENTER_HORIZONTAL.or(Gravity.CENTER_VERTICAL)

@@ -26,16 +26,8 @@ class SolluzManager private constructor(val machineData: MachineData) {
 
     fun startMoritoring() = machineData.showState(this::dataUpdated, this::pushUpdated)
     fun stopMonitoring() = machineData.clear()
-    fun updateSetting() {
-        val pref = PreferenceManager.getDefaultSharedPreferences(SolluzApplication.context())
-        val address = pref.getString("pref_key_url_text", "http://solluz.iptime.org/Data/")
-        val code = pref.getString("pref_key_company_code_text", "MachineData2")
-        val time = pref.getString("pref_key_interval_list", "1000").toLong()
-        val push = pref.getBoolean("pref_key_push_switch", true)
-
-        Log.i(TAG, "updateSetting : $address, $code, $time, $push")
+    fun updateSetting(address : String, code : String, time : Long, push : Boolean) {
         machineData.updateSetting(address,code,time,push)
-        startMoritoring()
     }
 
     val data = MutableLiveData<String>()
@@ -53,6 +45,7 @@ class SolluzManager private constructor(val machineData: MachineData) {
         val datas = pPush.split(",")
         if (datas.size < 2) {
             Log.e(TAG, "pushUpdated : wrong format - $pPush")
+            push.value = "Wrong,format"
             return
         }
         val time = datas[0].substringAfterLast(":")

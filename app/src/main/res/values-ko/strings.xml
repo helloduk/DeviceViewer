@@ -16,12 +16,7 @@
     </string>
 
     <string name="pref_title_url_address">URL 주소</string>
-    <string name="pref_default_url_address">solluz.iptime.org/Data/</string>
-
     <string name="pref_title_company_code">업체코드</string>
-    <string name="pref_default_company_code">MachineData2</string>
-
-
     <string name="pref_title_select_interval">데이터 수집 간격</string>
 
 </resources>
