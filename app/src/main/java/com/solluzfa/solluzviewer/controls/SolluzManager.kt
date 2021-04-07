@@ -2,21 +2,18 @@ package com.solluzfa.solluzviewer.controls
 
 import android.arch.lifecycle.Lifecycle
 import android.arch.lifecycle.MutableLiveData
-import android.content.SharedPreferences
-import android.preference.PreferenceManager
 import android.util.Log
-import com.solluzfa.solluzviewer.SolluzApplication
-import com.solluzfa.solluzviewer.model.MachineData
+import com.solluzfa.solluzviewer.model.DataRepository
 import java.text.SimpleDateFormat
 
-class SolluzManager private constructor(val machineData: MachineData) {
+class SolluzManager private constructor(val dataRepository: DataRepository) {
     companion object {
         @Volatile private var instance : SolluzManager? = null
-        fun getInstance(machineData: MachineData) = instance ?: synchronized(this){
-            SolluzManager(machineData).also { instance = it }
+        fun getInstance(dataRepository: DataRepository) = instance ?: synchronized(this){
+            SolluzManager(dataRepository).also { instance = it }
         }
         fun getInstance() = instance ?: synchronized(this) {
-            SolluzManager(MachineData.getInstance()).also { instance = it }
+            SolluzManager(DataRepository.getInstance()).also { instance = it }
         }
         val TAG = "SolluzManager"
     }
@@ -24,10 +21,10 @@ class SolluzManager private constructor(val machineData: MachineData) {
     val notificationManager = NotificationManager.getInstance()
     var state : Lifecycle.State = Lifecycle.State.INITIALIZED
 
-    fun startMoritoring() = machineData.showState(this::dataUpdated, this::pushUpdated)
-    fun stopMonitoring() = machineData.clear()
-    fun updateSetting(address : String, code : String, time : Long, push : Boolean) {
-        machineData.updateSetting(address,code,time,push)
+    fun startMoritoring() = dataRepository.showState(this::dataUpdated, this::pushUpdated)
+    fun stopMonitoring() = dataRepository.clear()
+    fun updateSetting(bluetooth: Boolean, address : String, code : String, time : Long, push : Boolean) {
+        dataRepository.updateSetting(bluetooth, address,code,time,push)
     }
 
     val data = MutableLiveData<String>()

@@ -50,13 +50,14 @@ class SolluzService : Service() {
 
     fun updateSetting() : Boolean {
         val pref = PreferenceManager.getDefaultSharedPreferences(applicationContext)
+        val bluetooth = pref.getBoolean(getString(R.string.pref_key_bluetooth), false)
         val address = pref.getString(applicationContext.getString(R.string.pref_key_url_text), "http://solluz.iptime.org/Data/")
         val code = pref.getString(applicationContext.getString(R.string.pref_key_company_code_text), "MachineData2")
         val time = pref.getString(applicationContext.getString(R.string.pref_key_interval_list), "1000").toLong()
         val push = pref.getBoolean(applicationContext.getString(R.string.pref_key_push_switch), true)
 
-        Log.i(TAG, "updateSetting : $address, $code, $time, $push")
-        solluzManager.updateSetting(address, code, time, push)
+        Log.i(TAG, "updateSetting : $bluetooth $address, $code, $time, $push")
+        solluzManager.updateSetting(bluetooth, address, code, time, push)
         return time != 0L
     }
 

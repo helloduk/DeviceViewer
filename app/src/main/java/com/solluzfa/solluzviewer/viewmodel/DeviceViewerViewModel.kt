@@ -2,10 +2,7 @@ package com.solluzfa.solluzviewer.viewmodel
 
 import android.arch.lifecycle.*
 import android.util.Log
-import com.solluzfa.solluzviewer.model.MachineData
-import com.solluzfa.solluzviewer.controls.NotificationManager
 import com.solluzfa.solluzviewer.controls.SolluzManager
-import java.text.SimpleDateFormat
 
 class DeviceViewerViewModel (private val solluzManager: SolluzManager) : ViewModel(), LifecycleObserver {
     companion object {

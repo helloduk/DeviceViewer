@@ -42,12 +42,10 @@
         android:layout_height="44dp"
         android:layout_marginLeft="10dp"
         android:layout_margin="5dp"
-        android:padding="10dp"
         android:layout_gravity="center_vertical"
         android:cropToPadding="true"
         android:scaleType="centerCrop"
-        android:src="@drawable/cancel"
-        android:background="#ffffff"
+        android:src="@drawable/ic_cancel_black_24dp"
         />
 
 </LinearLayout>
