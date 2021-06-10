@@ -43,8 +43,8 @@ class DataRepository private constructor() {
     private val lObservale = Observable.defer { getLayoutObservable() }
     private val pObservale = Observable.defer { getPushObservable() }
 
-    private var dataReader: DataReader = DataReaderURL()
-//    private var dataReader = DataReaderBluetooth()
+//    private var dataReader: DataReader = DataReaderURL()
+    private var dataReader = DataReaderBluetooth()
 
     private fun getDataObservable(): Observable<String> {
         return Observable.interval(0L, interval, TimeUnit.MILLISECONDS)
@@ -135,8 +135,9 @@ class DataRepository private constructor() {
     fun updateSetting(bluetooth: Boolean, address: String, code: String, time: Long, push: Boolean) {
         dataReader = if (bluetooth)
             DataReaderBluetooth()
-        else
+        else {
             DataReaderURL()
+        }
         dataReader.updateSetting(address, code)
 
         interval = time

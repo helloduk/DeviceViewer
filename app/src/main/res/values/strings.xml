@@ -16,7 +16,6 @@
     <string name="solluz_preference_name" translatable="false">com.solluzfa.solluzfaviewer.pref</string>
     <string name="channel_register_pref" translatable="false">Channel_Register</string>
 
-
     <!-- Strings related to Settings -->
     <string name="pref_key_url_text" translatable="false">url_text</string>
     <string name="pref_key_company_code_text" translatable="false">company_code_text</string>
@@ -34,7 +33,7 @@
 
     <string name="pref_title_use_bluetooth">Use Bluetooth</string>
     <string name="pref_description_use_bluetooth">use bluetooth instead of mobile data</string>
-
+    <string name="pref_description_not_support_bluetooth" translatable="false">This device does not support Bluetooth LE</string>
 
     <string name="pref_title_select_interval">Reading interval</string>
     <string name="pref_key_bluetooth" translatable="false">bluetooth</string>

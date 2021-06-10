@@ -2,6 +2,7 @@ package com.solluzfa.solluzviewer.view
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
@@ -49,12 +50,18 @@ class SettingsActivity : AppCompatPreferenceActivity() {
 
             registerPreferenceListener()
 
-            updateEnabledByBluetoothChecked()
+            updateEnabledAboutBluetooth()
         }
 
-        private fun updateEnabledByBluetoothChecked() {
+        private fun updateEnabledAboutBluetooth() {
             val bluetoothPreference = findPreference(context.getString(R.string.pref_key_bluetooth))
-            enableExceptBluetooth(!(bluetoothPreference as SwitchPreference).isChecked)
+
+            if (context.packageManager.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
+                enableExceptBluetooth(!(bluetoothPreference as SwitchPreference).isChecked)
+            } else {
+                bluetoothPreference.isEnabled = false
+                bluetoothPreference.summary = getString(R.string.pref_description_not_support_bluetooth)
+            }
         }
 
         private fun registerPreferenceListener() {
