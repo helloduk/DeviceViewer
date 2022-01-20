@@ -1,33 +1,34 @@
 package com.solluzfa.solluzviewer.viewmodel
 
 import android.arch.lifecycle.*
-import android.util.Log
-import com.solluzfa.solluzviewer.model.MachineData
-import com.solluzfa.solluzviewer.controls.NotificationManager
+import com.solluzfa.solluzviewer.Log
 import com.solluzfa.solluzviewer.controls.SolluzManager
-import java.text.SimpleDateFormat
 
-class DeviceViewerViewModel (private val solluzManager: SolluzManager) : ViewModel(), LifecycleObserver {
+class DeviceViewerViewModel(private val solluzManager: SolluzManager) : ViewModel(),
+    LifecycleObserver {
     companion object {
         val TAG = DeviceViewerViewModel::class.java.simpleName
     }
+
+    var currentMachineID = 0
+
     fun getData() = solluzManager.data
     fun getPush() = solluzManager.push
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun onCreate() {
-        Log.i(TAG,"OnCreate")
+        Log.i(TAG, "OnCreate")
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
     fun onResume() {
-        Log.i(TAG,"OnResume")
+        Log.i(TAG, "OnResume")
         solluzManager.state = Lifecycle.State.RESUMED
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
     fun onPause() {
-        Log.i(TAG,"OnPause")
+        Log.i(TAG, "OnPause")
         solluzManager.state = Lifecycle.State.STARTED
     }
 

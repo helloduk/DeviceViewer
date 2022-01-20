@@ -6,9 +6,12 @@ import com.solluzfa.solluzviewer.viewmodel.DeviceViewerViewModelFactory
 
 object InjectorUtils {
     fun provideDeviceViewerViewModelFactory() : DeviceViewerViewModelFactory {
-        val solluzManager = SolluzManager.getInstance(MachineData.getInstance())
+        val solluzManager = SolluzManager.getInstance()
         return DeviceViewerViewModelFactory(solluzManager)
     }
-    val STOP_SERVICE = "stop_service"
-    val UPDATE_SETTINGS = "update_settings"
+
+    const val STOP_SERVICE = "stop_service"
+    const val UPDATE_SETTINGS = "update_settings"
+
+    const val EXTRA_KEY_MACHINE_ID = "machine_id"
 }

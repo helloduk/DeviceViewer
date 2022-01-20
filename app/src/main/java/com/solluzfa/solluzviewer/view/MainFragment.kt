@@ -1,27 +1,23 @@
 package com.solluzfa.solluzviewer.view
 
+import android.annotation.SuppressLint
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
-import android.graphics.Color
+import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.util.Log
-import android.view.Gravity
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import com.solluzfa.solluzviewer.Log
 import com.solluzfa.solluzviewer.R
 import com.solluzfa.solluzviewer.utils.InjectorUtils
-
 import com.solluzfa.solluzviewer.viewmodel.DeviceViewerViewModel
 import kotlinx.android.synthetic.main.captionlist_layout.*
 import kotlinx.android.synthetic.main.captionlist_layout.view.*
-import java.text.SimpleDateFormat
-import java.util.ArrayList
+import java.util.*
 
 /**
  * A fragment representing a list of Items.
@@ -31,16 +27,20 @@ import java.util.ArrayList
 class MainFragment : Fragment() {
     private val TAG = "MainFragment"
     private var columnCount = 1
+    private var machineID = 0
     private var listener: OnListFragmentInteractionListener? = null
-    private val items: MutableList<Item> = ArrayList()
+    private val items: MutableList<DataParser.Item> = ArrayList()
 
     private val mViewModel: DeviceViewerViewModel by lazy {
-        ViewModelProviders.of(this, InjectorUtils.provideDeviceViewerViewModelFactory()).get(DeviceViewerViewModel::class.java)
+        ViewModelProviders.of(this, InjectorUtils.provideDeviceViewerViewModelFactory())
+            .get(DeviceViewerViewModel::class.java)
     }
-    data class Item(var tt: String, var tb: Int, var tf: Int, var ta: Int, var ct: String, var cb: Int, var cf: Int)
 
-    private val dataChangedListener = Observer<String> { it?.let { updateView(it) } }
-    private val pushChangedListener = Observer<String> { it?.let { pushUpdateView(it) } }
+
+    private val dataChangedListener =
+        Observer<ArrayList<String>> { it?.let { updateView(it[mViewModel.currentMachineID]) } }
+    private val pushChangedListener =
+        Observer<ArrayList<String>> { it?.let { pushUpdateView(it[mViewModel.currentMachineID]) } }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.i(TAG, "OnCreate")
@@ -51,13 +51,17 @@ class MainFragment : Fragment() {
 
         arguments?.let {
             columnCount = it.getInt(ARG_COLUMN_COUNT)
+            machineID = it.getInt(ARG_MACHINE_ID)
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         Log.i(TAG, "OnCreateView")
         val view = inflater.inflate(R.layout.captionlist_layout, container, false)
+        setHasOptionsMenu(true)
 
         // Set the adapter
         if (view.data_list is RecyclerView) {
@@ -66,10 +70,30 @@ class MainFragment : Fragment() {
                     columnCount <= 1 -> LinearLayoutManager(context)
                     else -> GridLayoutManager(context, columnCount)
                 }
-                adapter = MyItemRecyclerViewAdapter(items, listener)
+                adapter = MainItemAdapter(items, listener)
             }
         }
         return view
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater?.inflate(R.menu.main, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Handle action bar item clicks here. The action bar wi7260ll
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        val id = item.itemId
+
+
+        return if (id == R.id.action_settings) {
+            val intent = Intent(context, SettingsActivity::class.java)
+            intent.putExtra(InjectorUtils.EXTRA_KEY_MACHINE_ID, mViewModel.currentMachineID)
+            startActivity(Intent(context, SettingsActivity::class.java))
+            true
+        } else super.onOptionsItemSelected(item)
     }
 
     private fun pushUpdateView(data: String) {
@@ -81,85 +105,11 @@ class MainFragment : Fragment() {
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun updateView(data: String) {
-        Log.i(TAG, "updateView $data")
-        //Row:4,TT1:Text1,TB1:255255255,TF1:000000000,TT2:Text2,TB2:243175175,TF2:000000000,TT3:Text3,TB3:255255255,TF3:000000000,TT4:Text4,TB4:255255255,TF4:000000000
-        //Name:Title Text,Row:4,CT1:Caption1,CB1:011097019,CF1:255255255,TA1:Right,CT2:Caption2,CB2:164020020,CF2:255255255,TA2:Left,CT3:Caption3,CB3:052118232,CF3:000000000,TA3:Center,CT4:Caption4,CB4:023108097,CF4:255255255,TA4:Center
-
-        val datas = data.split(";")
-
-        val valueData = datas[0]?.split(",")
-        val layoutData = datas[1]?.split(",")
-
-        val rows = valueData?.get(0)?.substringAfterLast(":")?.toIntOrNull()
-
-        if (rows == null) {
-            device_name.text = "Wrong format"
-            return
-        }
-
-        if (valueData != null && layoutData != null) {
-            device_name.text = layoutData[0]?.substringAfterLast(":") ?: "Parsing error"
-
-            rows?.let {
-                if (items.size != rows)
-                    items.clear()
-
-                for (i in 0 until rows) {
-                    val dataItem: Item = Item(
-                            tt = valueData[1 + (i * 3)]?.substringAfterLast(":"),
-                            tb = parseColor(valueData[2 + (i * 3)]?.substringAfterLast(":")),
-                            tf = parseColor(valueData[3 + (i * 3)]?.substringAfterLast(":")),
-                            ct = layoutData[2 + (i * 4)]?.substringAfterLast(":"),
-                            cb = parseColor(layoutData[3 + (i * 4)]?.substringAfterLast(":")),
-                            cf = parseColor(layoutData[4 + (i * 4)]?.substringAfterLast(":")),
-                            ta = when (layoutData[5 + (i * 4)]?.substringAfterLast(":")) {
-                                "Right" -> Gravity.RIGHT.or(Gravity.CENTER_VERTICAL)
-                                "Left" -> Gravity.LEFT.or(Gravity.CENTER_VERTICAL)
-                                "Center" -> Gravity.CENTER_HORIZONTAL.or(Gravity.CENTER_VERTICAL)
-                                else -> Gravity.RIGHT.or(Gravity.CENTER_VERTICAL)
-                            }
-                    )
-                    if (items.size >= i + 1)
-                        items[i] = dataItem
-                    else
-                        items.add(i, dataItem)
-                }
-            }
-        }
+        device_name.text = DataParser.updateView(data, items) ?: "Parsing error"
         data_list.adapter?.notifyDataSetChanged() ?: let { Log.e(TAG, "Error. adapter is null") }
-
     }
-
-    private fun parseColor(input: String): Int {
-        val red = input.substring(0, 3)
-        val green = input.substring(3, 6)
-        val blue = input.substring(6)
-
-        return Color.rgb(red.toInt(), green.toInt(), blue.toInt())
-    }
-
-    //    private fun update(packet: String) {
-//        Log.i(TAG, "update : " + packet)
-//        //N:Solluz 비전 검사 장비,S:Y,G:100,N:2
-//        val datas = packet.split(",")
-//        if(datas.size >= 4) {
-//            try {
-//                val passedValue = datas[2].substringAfterLast(":").toInt()
-//                val failedValue = datas[3].substringAfterLast(":").toInt()
-//                name.value = datas[0].substringAfterLast(":")
-//                state.value = datas[1].substringAfterLast(":").equals("Y")
-//                passed.value = passedValue
-//                failed.value = failedValue
-//                total.value = passedValue + failedValue
-//                passPercentage.value = passedValue.toFloat() * 100 / (passedValue + failedValue)
-//            } catch(e : Exception) {
-//                Log.e(TAG, "Invalid type ${e.toString()}");
-//            }
-//        } else {
-//            Log.e(TAG, "Invalid type");
-//        }
-//    }
 
 
     override fun onAttach(context: Context) {
@@ -176,34 +126,22 @@ class MainFragment : Fragment() {
         listener = null
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     *
-     *
-     * See the Android Training lesson
-     * [Communicating with Other Fragments](http://developer.android.com/training/basics/fragments/communicating.html)
-     * for more information.
-     */
     interface OnListFragmentInteractionListener {
         // TODO: Update argument type and name
-        fun onListFragmentInteraction(item: Item?)
+        fun onListFragmentInteraction(item: DataParser.Item?)
     }
 
     companion object {
-
-        // TODO: Customize parameter argument names
         const val ARG_COLUMN_COUNT = "column-count"
+        const val ARG_MACHINE_ID = "machine_id"
 
-        // TODO: Customize parameter initialization
         @JvmStatic
-        fun newInstance(columnCount: Int) =
-                MainFragment().apply {
-                    arguments = Bundle().apply {
-                        putInt(ARG_COLUMN_COUNT, columnCount)
-                    }
+        fun newInstance(machineID: Int, columnCount: Int) =
+            MainFragment().apply {
+                arguments = Bundle().apply {
+                    putInt(ARG_COLUMN_COUNT, columnCount)
+                    putInt(ARG_MACHINE_ID, machineID)
                 }
+            }
     }
 }

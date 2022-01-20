@@ -9,6 +9,7 @@
     <string name="passed_percentage">양품률 (%)</string>
     <string name="title_activity_settings">설정</string>
     <string name="now_monitoring">상태 감시중..</string>
+    <string name="add_machine">기기 추가</string>
 
     <!-- Strings related to Settings -->
     <string name="pref_title_push_notification">Push notification</string>

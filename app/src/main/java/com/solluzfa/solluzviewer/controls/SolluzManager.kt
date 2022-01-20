@@ -2,50 +2,103 @@ package com.solluzfa.solluzviewer.controls
 
 import android.arch.lifecycle.Lifecycle
 import android.arch.lifecycle.MutableLiveData
-import android.content.SharedPreferences
+import android.content.Context
 import android.preference.PreferenceManager
-import android.util.Log
-import com.solluzfa.solluzviewer.SolluzApplication
+import com.solluzfa.solluzviewer.Log
+import com.solluzfa.solluzviewer.R
 import com.solluzfa.solluzviewer.model.MachineData
 import java.text.SimpleDateFormat
 
-class SolluzManager private constructor(val machineData: MachineData) {
+class SolluzManager {
     companion object {
-        @Volatile private var instance : SolluzManager? = null
-        fun getInstance(machineData: MachineData) = instance ?: synchronized(this){
-            SolluzManager(machineData).also { instance = it }
-        }
+        @Volatile
+        private var instance: SolluzManager? = null
         fun getInstance() = instance ?: synchronized(this) {
-            SolluzManager(MachineData.getInstance()).also { instance = it }
+            SolluzManager().also { instance = it }
         }
+
         val TAG = "SolluzManager"
     }
 
     val notificationManager = NotificationManager.getInstance()
-    var state : Lifecycle.State = Lifecycle.State.INITIALIZED
+    var state: Lifecycle.State = Lifecycle.State.INITIALIZED
 
-    fun startMoritoring() = machineData.showState(this::dataUpdated, this::pushUpdated)
-    fun stopMonitoring() = machineData.clear()
-    fun updateSetting(address : String, code : String, time : Long, push : Boolean) {
-        machineData.updateSetting(address,code,time,push)
+    fun startMoritoring() =
+        machineDataList.forEach { m -> m.showState(this::dataUpdated, this::pushUpdated) }
+
+    fun stopMonitoring() = machineDataList.forEach { m -> m.clear() }
+
+    fun updateSetting(applicationContext: Context): Boolean {
+        val pref = PreferenceManager.getDefaultSharedPreferences(applicationContext)
+
+        var machineCount = 0
+
+        machineDataList.clear()
+
+        while (true) {
+            val address = pref.getString(
+                applicationContext.getString(R.string.pref_key_url_text) + machineCount,
+                ""
+            )
+            val code = pref.getString(
+                applicationContext.getString(R.string.pref_key_company_code_text) + machineCount,
+                ""
+            )
+            val time = pref.getString(
+                applicationContext.getString(R.string.pref_key_interval_list) + machineCount,
+                "1000"
+            )?.toLong()
+            val push = pref.getBoolean(
+                applicationContext.getString(R.string.pref_key_push_switch) + machineCount,
+                true
+            )
+
+            if (address == "") {
+                break;
+            } else {
+                machineDataList.add(
+                    machineCount,
+                    MachineData(machineCount).apply { updateSetting(address, code, time!!, push) })
+                machineCount++
+            }
+        }
+
+        if (machineDataList.isEmpty()) {
+            machineDataList.add(MachineData(machineCount).apply {
+                updateSetting(
+                    "http://solluz.iptime.org/Data/",
+                    "MachineData2",
+                    1000L,
+                    true
+                )
+            })
+        }
+
+        Log.i(TAG, "updateSetting : ${machineDataList.size}")
+        return true
     }
 
-    val data = MutableLiveData<String>()
-    val push = MutableLiveData<String>()
-    var lastUpdateTime = ""
+    var machineDataList = ArrayList<MachineData>()
+    val data = MutableLiveData<ArrayList<String>>().apply {
+        value = ArrayList()
+    }
+    val push = MutableLiveData<ArrayList<String>>().apply {
+        value = ArrayList()
+    }
+    var lastUpdateTime = ArrayList<String>()
 
 
-    fun dataUpdated(pData : String) {
-        Log.i(TAG, "dataUpdated : $pData")
-        data.value = pData
+    fun dataUpdated(machineID: Int, pData: String) {
+        Log.i(TAG, "dataUpdated : $machineID, $pData")
+        updateData(data, machineID, pData)
     }
 
-    fun pushUpdated(pPush : String) {
+    fun pushUpdated(machineID: Int, pPush: String) {
         Log.i(TAG, "pushUpdated : $pPush")
         val datas = pPush.split(",")
         if (datas.size < 2) {
             Log.e(TAG, "pushUpdated : wrong format - $pPush")
-            push.value = "Wrong,format"
+            updateData(push, machineID, "Wrong format")
             return
         }
         val time = datas[0].substringAfterLast(":")
@@ -55,12 +108,35 @@ class SolluzManager private constructor(val machineData: MachineData) {
         val newDate = newFormat.format(originDate)
 
         val content = datas[1].substringAfterLast(":")
-        push.value = "$newDate,$content"
-        if(lastUpdateTime != newDate) {
-            if (state == Lifecycle.State.STARTED || state == Lifecycle.State.DESTROYED) {
-                    notificationManager.makeNotification(content, newDate)
-            }
-            lastUpdateTime = newDate
+
+        updateData(push, machineID, "$newDate,$content")
+
+        if (lastUpdateTime.lastIndex < machineID) {
+            updateNotification(content, newDate)
+            lastUpdateTime.add(machineID, newDate)
+        } else if (lastUpdateTime[machineID] != newDate) {
+            updateNotification(content, newDate)
+            lastUpdateTime.set(machineID, newDate)
         }
     }
+
+    private fun updateNotification(content: String, newDate: String) {
+        if (state == Lifecycle.State.STARTED || state == Lifecycle.State.DESTROYED) {
+            notificationManager.makeNotification(content, newDate)
+        }
+    }
+
+    private fun updateData(
+        data: MutableLiveData<ArrayList<String>>,
+        machineID: Int,
+        value: String
+    ) {
+        if (data.value?.lastIndex!! < machineID) {
+            data.value?.add(machineID, value)
+        } else {
+            data.value?.set(machineID, value)
+        }
+        data.postValue(data.value)
+    }
+
 }

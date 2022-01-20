@@ -14,20 +14,16 @@ import kotlinx.android.synthetic.main.list_item.view.*
  * specified [OnListFragmentInteractionListener].
  * TODO: Replace the implementation with code for your data type.
  */
-class MyItemRecyclerViewAdapter(
-        private val mValues: List<MainFragment.Item>,
+class MainItemAdapter(
+        private val mValues: List<DataParser.Item>,
         private val mListener: OnListFragmentInteractionListener?)
-    : RecyclerView.Adapter<MyItemRecyclerViewAdapter.ViewHolder>() {
+    : RecyclerView.Adapter<MainItemAdapter.ViewHolder>() {
 
-    private val mOnClickListener: View.OnClickListener
-
-    init {
-        mOnClickListener = View.OnClickListener { v ->
-            val item = v.tag as MainFragment.Item
-            // Notify the active callbacks interface (the activity, if the fragment is attached to
-            // one) that an item has been selected.
-            mListener?.onListFragmentInteraction(item)
-        }
+    private val mOnClickListener: View.OnClickListener = View.OnClickListener { v ->
+        val item = v.tag as DataParser.Item
+        // Notify the active callbacks interface (the activity, if the fragment is attached to
+        // one) that an item has been selected.
+        mListener?.onListFragmentInteraction(item)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

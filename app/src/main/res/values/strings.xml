@@ -11,6 +11,7 @@
     <string name="home_url">http://www.solluz-fa.com</string>
     <string name="title_activity_settings">Settings</string>
     <string name="now_monitoring">Now monitoring...</string>
+    <string name="add_machine">Add machine</string>
 
     <!-- Preference -->
     <string name="solluz_preference_name">com.solluzfa.solluzfaviewer.pref</string>

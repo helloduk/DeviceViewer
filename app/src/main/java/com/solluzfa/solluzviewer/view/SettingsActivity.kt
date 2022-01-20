@@ -8,9 +8,11 @@ import android.os.Build
 import android.os.Bundle
 import android.preference.*
 import android.view.MenuItem
+import com.solluzfa.solluzviewer.Log
 import com.solluzfa.solluzviewer.R
 import com.solluzfa.solluzviewer.controls.SolluzService
 import com.solluzfa.solluzviewer.utils.InjectorUtils
+import com.solluzfa.solluzviewer.utils.InjectorUtils.EXTRA_KEY_MACHINE_ID
 
 /**
  * A [PreferenceActivity] that presents a set of application settings. On
@@ -27,12 +29,16 @@ class SettingsActivity : AppCompatPreferenceActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setupActionBar()
-        fragmentManager.beginTransaction().replace(android.R.id.content, GeneralPreferenceFragment()).commit()
+        machineID = intent.getIntExtra(EXTRA_KEY_MACHINE_ID, 0)
+        fragmentManager.beginTransaction()
+            .replace(android.R.id.content, GeneralPreferenceFragment()).commit()
     }
 
     override fun onPause() {
         super.onPause()
-        val intent = Intent(this, SolluzService::class.java).also { it.action = InjectorUtils.UPDATE_SETTINGS }
+        val intent = Intent(this, SolluzService::class.java).also {
+            it.action = InjectorUtils.UPDATE_SETTINGS
+        }
         startService(intent)
     }
 
@@ -74,18 +80,39 @@ class SettingsActivity : AppCompatPreferenceActivity() {
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     class GeneralPreferenceFragment : PreferenceFragment() {
+        private val TAG: String = "SettingsActivity"
+
         override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
             addPreferencesFromResource(R.xml.pref_general)
             setHasOptionsMenu(true)
+            setKey()
+        }
 
-            // Bind the summaries of EditText/List/Dialog/Ringtone preferences
-            // to their values. When their values change, their summaries are
-            // updated to reflect the new value, per the Android Design
-            // guidelines.
-            bindPreferenceSummaryToValue(findPreference("url_text"))
-            bindPreferenceSummaryToValue(findPreference("company_code_text"))
-            bindPreferenceSummaryToValue(findPreference("interval_list"))
+        private fun setKey() {
+            val uriPreference = findPreference(resources.getString(R.string.pref_key_url_text))
+            val companyCodePreference = findPreference(resources.getString(R.string.pref_key_company_code_text))
+            val intervalListPreference = findPreference(resources.getString(R.string.pref_key_interval_list))
+            val pushSwitchPreference = findPreference(resources.getString(R.string.pref_key_push_switch))
+//
+//            val urlText = PreferenceManager
+//                .getDefaultSharedPreferences(uriPreference.context)
+//                .getString(uriPreference.key + machineID, "Not exist")
+
+            uriPreference.key = uriPreference.key + machineID
+            companyCodePreference.key = companyCodePreference.key + machineID
+            intervalListPreference.key = intervalListPreference.key + machineID
+            pushSwitchPreference.key = pushSwitchPreference.key + machineID
+
+            bindPreferenceSummaryToValue(uriPreference)
+            bindPreferenceSummaryToValue(companyCodePreference)
+            bindPreferenceSummaryToValue(intervalListPreference)
+
+            Log.i(TAG, "machineID: $machineID" +
+                    ", uriPreference.key: ${uriPreference.key}" +
+                    ", companyCodePreference.key: ${companyCodePreference.key}" +
+                    ", intervalListPreference.key: ${intervalListPreference.key}" +
+                    ", pushSwitchPreference.key: ${pushSwitchPreference.key}")
         }
 
         override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -99,62 +126,45 @@ class SettingsActivity : AppCompatPreferenceActivity() {
     }
 
     companion object {
+        var machineID = 0
+        private val sBindPreferenceSummaryToValueListener =
+            Preference.OnPreferenceChangeListener { preference, value ->
+                val stringValue = value.toString()
 
-        /**
-         * A preference value change listener that updates the preference's summary
-         * to reflect its new value.
-         */
-        private val sBindPreferenceSummaryToValueListener = Preference.OnPreferenceChangeListener { preference, value ->
-            val stringValue = value.toString()
-
-            if (preference is ListPreference) {
-                // For list preferences, look up the correct display value in
-                // the preference's 'entries' list.
-                val listPreference = preference
-                val index = listPreference.findIndexOfValue(stringValue)
-
-                // Se  t the summary to reflect the new value.
-                preference.setSummary(
+                if (preference is ListPreference) {
+                    val listPreference = preference
+                    val index = listPreference.findIndexOfValue(stringValue)
+                    preference.setSummary(
                         if (index >= 0)
                             listPreference.entries[index]
                         else
-                            null)
+                            null
+                    )
 
-            } else {
-                // For all other preferences, set the summary to the value's
-                // simple string representation.
-                preference.summary = stringValue
+                } else {
+                    preference.summary = stringValue
+                }
+
+                PreferenceManager
+                    .getDefaultSharedPreferences(preference.context).edit()
+                    .putString(preference.key + machineID, stringValue).commit()
+
+                true
             }
-            true
-        }
 
-        /**
-         * Helper method to determine if the device has an extra-large screen. For
-         * example, 10" tablets are extra-large.
-         */
         private fun isXLargeTablet(context: Context): Boolean {
             return context.resources.configuration.screenLayout and Configuration.SCREENLAYOUT_SIZE_MASK >= Configuration.SCREENLAYOUT_SIZE_XLARGE
         }
 
-        /**
-         * Binds a preference's summary to its value. More specifically, when the
-         * preference's value is changed, its summary (line of text below the
-         * preference title) is updated to reflect the value. The summary is also
-         * immediately updated upon calling this method. The exact display format is
-         * dependent on the type of preference.
-
-         * @see .sBindPreferenceSummaryToValueListener
-         */
         private fun bindPreferenceSummaryToValue(preference: Preference) {
-            // Set the listener to watch for value changes.
             preference.onPreferenceChangeListener = sBindPreferenceSummaryToValueListener
 
-            // Trigger the listener immediately with the preference's
-            // current value.
-            sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
-                    PreferenceManager
-                            .getDefaultSharedPreferences(preference.context)
-                            .getString(preference.key, ""))
+            sBindPreferenceSummaryToValueListener.onPreferenceChange(
+                preference,
+                PreferenceManager
+                    .getDefaultSharedPreferences(preference.context)
+                    .getString(preference.key, "")
+            )
         }
     }
 }
