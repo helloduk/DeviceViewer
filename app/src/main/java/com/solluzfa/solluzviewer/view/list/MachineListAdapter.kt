@@ -1,11 +1,11 @@
-package com.solluzfa.solluzviewer.view
+package com.solluzfa.solluzviewer.view.list
 
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
-import com.solluzfa.solluzviewer.databinding.FragmentMachineListBinding
-import com.solluzfa.solluzviewer.view.MachineListContent.PlaceholderItem
+import com.solluzfa.solluzviewer.databinding.FragmentMachineListItemBinding
+import com.solluzfa.solluzviewer.view.list.MachineListContent.PlaceholderItem
 
 
 class MachineListAdapter(
@@ -16,7 +16,7 @@ class MachineListAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 
         return ViewHolder(
-            FragmentMachineListBinding.inflate(
+            FragmentMachineListItemBinding.inflate(
                 LayoutInflater.from(parent.context),
                 parent,
                 false
@@ -46,7 +46,7 @@ class MachineListAdapter(
 
     override fun getItemCount(): Int = values.size
 
-    inner class ViewHolder(binding: FragmentMachineListBinding) :
+    inner class ViewHolder(binding: FragmentMachineListItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
         val titleView: TextView = binding.titleTextView
         val valueView: TextView = binding.valueTextView

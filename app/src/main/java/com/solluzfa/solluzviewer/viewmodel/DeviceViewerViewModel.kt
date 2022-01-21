@@ -1,6 +1,9 @@
 package com.solluzfa.solluzviewer.viewmodel
 
-import android.arch.lifecycle.*
+import android.arch.lifecycle.Lifecycle
+import android.arch.lifecycle.LifecycleObserver
+import android.arch.lifecycle.OnLifecycleEvent
+import android.arch.lifecycle.ViewModel
 import com.solluzfa.solluzviewer.Log
 import com.solluzfa.solluzviewer.controls.SolluzManager
 
@@ -9,8 +12,6 @@ class DeviceViewerViewModel(private val solluzManager: SolluzManager) : ViewMode
     companion object {
         val TAG = DeviceViewerViewModel::class.java.simpleName
     }
-
-    var currentMachineID = 0
 
     fun getData() = solluzManager.data
     fun getPush() = solluzManager.push

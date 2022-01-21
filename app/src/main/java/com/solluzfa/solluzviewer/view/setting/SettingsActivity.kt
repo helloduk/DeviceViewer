@@ -1,4 +1,4 @@
-package com.solluzfa.solluzviewer.view
+package com.solluzfa.solluzviewer.view.setting
 
 import android.annotation.TargetApi
 import android.content.Context
@@ -13,6 +13,7 @@ import com.solluzfa.solluzviewer.R
 import com.solluzfa.solluzviewer.controls.SolluzService
 import com.solluzfa.solluzviewer.utils.InjectorUtils
 import com.solluzfa.solluzviewer.utils.InjectorUtils.EXTRA_KEY_MACHINE_ID
+import com.solluzfa.solluzviewer.view.MainActivity
 
 /**
  * A [PreferenceActivity] that presents a set of application settings. On
@@ -29,7 +30,7 @@ class SettingsActivity : AppCompatPreferenceActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setupActionBar()
-        machineID = intent.getIntExtra(EXTRA_KEY_MACHINE_ID, 0)
+        machineID = intent.getIntExtra(EXTRA_KEY_MACHINE_ID, 99)
         fragmentManager.beginTransaction()
             .replace(android.R.id.content, GeneralPreferenceFragment()).commit()
     }
@@ -86,27 +87,43 @@ class SettingsActivity : AppCompatPreferenceActivity() {
             super.onCreate(savedInstanceState)
             addPreferencesFromResource(R.xml.pref_general)
             setHasOptionsMenu(true)
-            setKey()
+            setKeyAndDefaultValue(activity)
         }
 
-        private fun setKey() {
+        private fun setKeyAndDefaultValue(context: Context) {
             val uriPreference = findPreference(resources.getString(R.string.pref_key_url_text))
             val companyCodePreference = findPreference(resources.getString(R.string.pref_key_company_code_text))
             val intervalListPreference = findPreference(resources.getString(R.string.pref_key_interval_list))
             val pushSwitchPreference = findPreference(resources.getString(R.string.pref_key_push_switch))
-//
-//            val urlText = PreferenceManager
-//                .getDefaultSharedPreferences(uriPreference.context)
-//                .getString(uriPreference.key + machineID, "Not exist")
 
             uriPreference.key = uriPreference.key + machineID
             companyCodePreference.key = companyCodePreference.key + machineID
             intervalListPreference.key = intervalListPreference.key + machineID
             pushSwitchPreference.key = pushSwitchPreference.key + machineID
 
+            uriPreference.setDefaultValue(PreferenceManager
+                .getDefaultSharedPreferences(context)
+                .getString(uriPreference.key, context.resources.getString(R.string.pref_default_url_address))
+            )
+
+            companyCodePreference.setDefaultValue(PreferenceManager
+                .getDefaultSharedPreferences(context)
+                .getString(companyCodePreference.key, context.resources.getString(R.string.pref_default_company_code))
+            )
+
+            intervalListPreference.setDefaultValue(PreferenceManager
+                .getDefaultSharedPreferences(context)
+                .getString(intervalListPreference.key, context.resources.getString(R.string.pref_default_reading_interval))
+            )
+
+            pushSwitchPreference.setDefaultValue(PreferenceManager
+                .getDefaultSharedPreferences(context)
+                .getBoolean(pushSwitchPreference.key, true))
+
             bindPreferenceSummaryToValue(uriPreference)
             bindPreferenceSummaryToValue(companyCodePreference)
             bindPreferenceSummaryToValue(intervalListPreference)
+            bindPreferenceSummaryToValue(pushSwitchPreference)
 
             Log.i(TAG, "machineID: $machineID" +
                     ", uriPreference.key: ${uriPreference.key}" +
@@ -129,26 +146,31 @@ class SettingsActivity : AppCompatPreferenceActivity() {
         var machineID = 0
         private val sBindPreferenceSummaryToValueListener =
             Preference.OnPreferenceChangeListener { preference, value ->
-                val stringValue = value.toString()
-
-                if (preference is ListPreference) {
-                    val listPreference = preference
-                    val index = listPreference.findIndexOfValue(stringValue)
-                    preference.setSummary(
-                        if (index >= 0)
-                            listPreference.entries[index]
-                        else
-                            null
-                    )
-
+                if (preference is SwitchPreference) {
+                    PreferenceManager
+                        .getDefaultSharedPreferences(preference.context).edit()
+                        .putBoolean(preference.key, value as Boolean).commit()
                 } else {
-                    preference.summary = stringValue
+                    val stringValue = value.toString()
+
+                    if (preference is ListPreference) {
+                        val listPreference = preference
+                        val index = listPreference.findIndexOfValue(stringValue)
+                        preference.setSummary(
+                            if (index >= 0)
+                                listPreference.entries[index]
+                            else
+                                null
+                        )
+
+                    } else {
+                        preference.summary = stringValue
+                    }
+
+                    PreferenceManager
+                        .getDefaultSharedPreferences(preference.context).edit()
+                        .putString(preference.key, stringValue).commit()
                 }
-
-                PreferenceManager
-                    .getDefaultSharedPreferences(preference.context).edit()
-                    .putString(preference.key + machineID, stringValue).commit()
-
                 true
             }
 
@@ -159,12 +181,21 @@ class SettingsActivity : AppCompatPreferenceActivity() {
         private fun bindPreferenceSummaryToValue(preference: Preference) {
             preference.onPreferenceChangeListener = sBindPreferenceSummaryToValueListener
 
-            sBindPreferenceSummaryToValueListener.onPreferenceChange(
-                preference,
-                PreferenceManager
-                    .getDefaultSharedPreferences(preference.context)
-                    .getString(preference.key, "")
-            )
+            if (preference is SwitchPreference) {
+                sBindPreferenceSummaryToValueListener.onPreferenceChange(
+                    preference,
+                    PreferenceManager
+                        .getDefaultSharedPreferences(preference.context)
+                        .getBoolean(preference.key, true)
+                )
+            } else {
+                sBindPreferenceSummaryToValueListener.onPreferenceChange(
+                    preference,
+                    PreferenceManager
+                        .getDefaultSharedPreferences(preference.context)
+                        .getString(preference.key, "")
+                )
+            }
         }
     }
 }

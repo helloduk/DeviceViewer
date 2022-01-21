@@ -18,6 +18,10 @@ class MachineData(val machineID: Int) {
         private val TAG = "MachineData"
     }
 
+    init {
+        Log.i(TAG, "MachineData created: $machineID")
+    }
+
     //Example
     //Row:4,TT1:Text1,TB1:255255255,TF1:000000000,TT2:Text2,TB2:243175175,TF2:000000000,TT3:Text3,TB3:255255255,TF3:000000000,TT4:Text4,TB4:255255255,TF4:000000000
     //Name:Title Text,Row:4,CT1:Caption1,CB1:011097019,CF1:255255255,TA1:Right,CT2:Caption2,CB2:164020020,CF2:255255255,TA2:Left,CT3:Caption3,CB3:052118232,CF3:000000000,TA3:Center,CT4:Caption4,CB4:023108097,CF4:255255255,TA4:Center
@@ -64,8 +68,11 @@ class MachineData(val machineID: Int) {
                         }
                 }
             }
-            .retry()
-            .doOnNext { data -> Log.i(TAG, data) }
+            .retry { _, _ ->
+                Thread.sleep(interval)
+                true
+            }
+            .doOnNext { data -> Log.i(TAG, "DataUpdated. machineID: $machineID, $data") }
             .observeOn(AndroidSchedulers.mainThread())
     }
 
@@ -88,8 +95,11 @@ class MachineData(val machineID: Int) {
                         }
                 }
             }
-            .retry()
-            .doOnNext { data -> Log.i(TAG, data) }
+            .retry { _, _ ->
+                Thread.sleep(interval)
+                true
+            }
+            .doOnNext { data -> Log.i(TAG, "LayoutUpdated. machineID: $machineID, $data") }
             .observeOn(AndroidSchedulers.mainThread())
     }
 
@@ -112,8 +122,11 @@ class MachineData(val machineID: Int) {
                         }
                 }
             }
-            .retry()
-            .doOnNext { data -> Log.i(TAG, data) }
+            .retry { _, _ ->
+                Thread.sleep(interval)
+                true
+            }
+            .doOnNext { data -> Log.i(TAG, "PushUpdated. machineID: $machineID, $data") }
             .observeOn(AndroidSchedulers.mainThread())
     }
 

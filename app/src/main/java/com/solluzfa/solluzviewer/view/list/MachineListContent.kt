@@ -1,4 +1,4 @@
-package com.solluzfa.solluzviewer.view
+package com.solluzfa.solluzviewer.view.list
 
 import java.util.*
 

@@ -1,8 +1,10 @@
 package com.solluzfa.solluzviewer.controls
 
+import android.annotation.SuppressLint
 import android.arch.lifecycle.Lifecycle
 import android.arch.lifecycle.MutableLiveData
 import android.content.Context
+import android.content.SharedPreferences
 import android.preference.PreferenceManager
 import com.solluzfa.solluzviewer.Log
 import com.solluzfa.solluzviewer.R
@@ -33,7 +35,10 @@ class SolluzManager {
 
         var machineCount = 0
 
-        machineDataList.clear()
+        with(machineDataList) {
+            forEach { it.clear() }
+            clear()
+        }
 
         while (true) {
             val address = pref.getString(
@@ -53,6 +58,8 @@ class SolluzManager {
                 true
             )
 
+            Log.i(TAG, "address: $address, code: $code, time: $time, push: $push")
+
             if (address == "") {
                 break;
             } else {
@@ -64,18 +71,46 @@ class SolluzManager {
         }
 
         if (machineDataList.isEmpty()) {
-            machineDataList.add(MachineData(machineCount).apply {
-                updateSetting(
-                    "http://solluz.iptime.org/Data/",
-                    "MachineData2",
-                    1000L,
-                    true
-                )
-            })
+            setDefaultMachine(applicationContext, pref, machineCount)
         }
 
         Log.i(TAG, "updateSetting : ${machineDataList.size}")
         return true
+    }
+
+    private fun setDefaultMachine(
+        applicationContext: Context,
+        pref: SharedPreferences,
+        machineCount: Int
+    ) {
+        with(pref.edit()) {
+            putString(
+                applicationContext.getString(R.string.pref_key_url_text) + machineCount,
+                "http://solluz.iptime.org/Data/"
+            )
+            putString(
+                applicationContext.getString(R.string.pref_key_company_code_text) + machineCount,
+                "MachineData2"
+            )
+            putString(
+                applicationContext.getString(R.string.pref_key_interval_list) + machineCount,
+                "1000"
+            )
+            putBoolean(
+                applicationContext.getString(R.string.pref_key_push_switch) + machineCount,
+                true
+            )
+            apply()
+        }
+
+        machineDataList.add(MachineData(machineCount).apply {
+            updateSetting(
+                "http://solluz.iptime.org/Data/",
+                "MachineData2",
+                1000L,
+                true
+            )
+        })
     }
 
     var machineDataList = ArrayList<MachineData>()
@@ -86,7 +121,6 @@ class SolluzManager {
         value = ArrayList()
     }
     var lastUpdateTime = ArrayList<String>()
-
 
     fun dataUpdated(machineID: Int, pData: String) {
         Log.i(TAG, "dataUpdated : $machineID, $pData")

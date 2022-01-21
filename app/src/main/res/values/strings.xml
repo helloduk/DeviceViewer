@@ -36,6 +36,8 @@
 
 
     <string name="pref_title_select_interval">Reading interval</string>
+    <string name="pref_default_reading_interval">1000</string>
+    <string name="machine_list">Machine List</string>
     <string-array name="pref_list_reading_interval_titles">
         <item>None</item>
         <item>1 sec</item>

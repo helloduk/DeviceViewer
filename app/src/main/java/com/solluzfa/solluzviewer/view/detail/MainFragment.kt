@@ -1,4 +1,4 @@
-package com.solluzfa.solluzviewer.view
+package com.solluzfa.solluzviewer.view.detail
 
 import android.annotation.SuppressLint
 import android.arch.lifecycle.Observer
@@ -14,6 +14,10 @@ import android.view.*
 import com.solluzfa.solluzviewer.Log
 import com.solluzfa.solluzviewer.R
 import com.solluzfa.solluzviewer.utils.InjectorUtils
+import com.solluzfa.solluzviewer.view.DataParser
+import com.solluzfa.solluzviewer.view.IOnBackPressed
+import com.solluzfa.solluzviewer.view.list.MachineListFragment
+import com.solluzfa.solluzviewer.view.setting.SettingsActivity
 import com.solluzfa.solluzviewer.viewmodel.DeviceViewerViewModel
 import kotlinx.android.synthetic.main.captionlist_layout.*
 import kotlinx.android.synthetic.main.captionlist_layout.view.*
@@ -24,7 +28,7 @@ import java.util.*
  * Activities containing this fragment MUST implement the
  * [MainFragment.OnListFragmentInteractionListener] interface.
  */
-class MainFragment : Fragment() {
+class MainFragment : Fragment(), IOnBackPressed {
     private val TAG = "MainFragment"
     private var columnCount = 1
     private var machineID = 0
@@ -36,11 +40,26 @@ class MainFragment : Fragment() {
             .get(DeviceViewerViewModel::class.java)
     }
 
-
     private val dataChangedListener =
-        Observer<ArrayList<String>> { it?.let { updateView(it[mViewModel.currentMachineID]) } }
+        Observer<ArrayList<String>> {
+            it?.let {
+                if (it.lastIndex < machineID) {
+                    Log.i(TAG, "dataChangedListener: Nothing to update")
+                } else {
+                    updateView(it[machineID])
+                }
+            }
+        }
     private val pushChangedListener =
-        Observer<ArrayList<String>> { it?.let { pushUpdateView(it[mViewModel.currentMachineID]) } }
+        Observer<ArrayList<String>> {
+            it?.let {
+                if (it.lastIndex < machineID) {
+                    Log.i(TAG, "pushChangedListener: Nothing to update")
+                } else {
+                    pushUpdateView(it[machineID])
+                }
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.i(TAG, "OnCreate")
@@ -90,10 +109,18 @@ class MainFragment : Fragment() {
 
         return if (id == R.id.action_settings) {
             val intent = Intent(context, SettingsActivity::class.java)
-            intent.putExtra(InjectorUtils.EXTRA_KEY_MACHINE_ID, mViewModel.currentMachineID)
-            startActivity(Intent(context, SettingsActivity::class.java))
+            intent.putExtra(InjectorUtils.EXTRA_KEY_MACHINE_ID, machineID)
+            startActivity(intent)
             true
         } else super.onOptionsItemSelected(item)
+    }
+
+    override fun onBackPressed(): Boolean {
+        val transaction = fragmentManager!!.beginTransaction()
+        transaction.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_right)
+        transaction.replace(R.id.content_main, MachineListFragment.newInstance(1))
+        transaction.commit()
+        return true
     }
 
     private fun pushUpdateView(data: String) {
@@ -107,7 +134,7 @@ class MainFragment : Fragment() {
 
     @SuppressLint("NotifyDataSetChanged")
     private fun updateView(data: String) {
-        device_name.text = DataParser.updateView(data, items) ?: "Parsing error"
+        device_name.text = DataParser.parse(data, items) ?: "Parsing error"
         data_list.adapter?.notifyDataSetChanged() ?: let { Log.e(TAG, "Error. adapter is null") }
     }
 
@@ -144,4 +171,6 @@ class MainFragment : Fragment() {
                 }
             }
     }
+
+
 }

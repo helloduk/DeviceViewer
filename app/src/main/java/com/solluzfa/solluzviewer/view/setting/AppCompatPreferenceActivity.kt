@@ -1,4 +1,4 @@
-package com.solluzfa.solluzviewer.view
+package com.solluzfa.solluzviewer.view.setting
 
 import android.content.res.Configuration
 import android.os.Bundle

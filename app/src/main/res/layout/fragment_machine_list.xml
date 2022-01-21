@@ -1,47 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="80dp"
-    android:orientation="horizontal">
+    android:layout_height="match_parent">
 
     <TextView
-        android:id="@+id/titleTextView"
+        android:id="@+id/machineListTitle"
         android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
-        android:gravity="center_vertical"
-        android:text="@string/app_name_one_line"
-        android:textColor="#000000"
-        android:textSize="20sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/valueTextView"
-        app:layout_constraintHorizontal_chainStyle="spread"
-        app:layout_constraintHorizontal_weight="3"
+        android:layout_height="60dp"
+        android:gravity="center"
+        android:text="@string/machine_list"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/valueTextView"
-        android:layout_width="0dp"
+    <View
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:background="#DADADA"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/machineListTitle" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/machine_list"
+        android:name="com.solluzfa.solluzviewer.view.MachineListFragment"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_centerInParent="true"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="8dp"
-        android:background="#ffffff"
-        android:gravity="end|center_vertical"
-        android:maxLines="1"
-        android:text="@string/app_name"
-        android:textColor="#000000"
-        android:textSize="18sp"
+        app:layoutManager="LinearLayoutManager"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_weight="2"
-        app:layout_constraintStart_toEndOf="@+id/titleTextView"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/divider"
+        tools:context=".view.list.MachineListFragment"
+        tools:listitem="@layout/fragment_machine_list_item" />
+
 </android.support.constraint.ConstraintLayout>

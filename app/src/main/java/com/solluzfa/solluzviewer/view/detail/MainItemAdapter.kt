@@ -1,12 +1,13 @@
-package com.solluzfa.solluzviewer.view
+package com.solluzfa.solluzviewer.view.detail
 
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.solluzfa.solluzviewer.R
+import com.solluzfa.solluzviewer.view.DataParser
 
-import com.solluzfa.solluzviewer.view.MainFragment.OnListFragmentInteractionListener
+import com.solluzfa.solluzviewer.view.detail.MainFragment.OnListFragmentInteractionListener
 import kotlinx.android.synthetic.main.list_item.view.*
 
 /**
@@ -15,8 +16,8 @@ import kotlinx.android.synthetic.main.list_item.view.*
  * TODO: Replace the implementation with code for your data type.
  */
 class MainItemAdapter(
-        private val mValues: List<DataParser.Item>,
-        private val mListener: OnListFragmentInteractionListener?)
+    private val mValues: List<DataParser.Item>,
+    private val mListener: OnListFragmentInteractionListener?)
     : RecyclerView.Adapter<MainItemAdapter.ViewHolder>() {
 
     private val mOnClickListener: View.OnClickListener = View.OnClickListener { v ->
