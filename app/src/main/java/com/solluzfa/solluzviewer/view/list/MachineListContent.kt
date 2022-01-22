@@ -6,10 +6,11 @@ object MachineListContent {
     val ITEMS: MutableList<PlaceholderItem> = ArrayList()
 
     data class PlaceholderItem(
-        val title: String?,
+        var title: String?,
         var tt: String,
         var tb: Int,
         var tf: Int,
-        var ta: Int
+        var ta: Int,
+        var deleteChecked: Boolean = false
     )
 }

@@ -74,8 +74,18 @@ class SolluzManager {
             setDefaultMachine(applicationContext, pref, machineCount)
         }
 
+        initData()
         Log.i(TAG, "updateSetting : ${machineDataList.size}")
         return true
+    }
+
+    private fun initData() {
+        data.value = ArrayList()
+        push.value = ArrayList()
+        repeat(machineDataList.size) {
+            data.value?.add("")
+            push.value?.add("")
+        }
     }
 
     private fun setDefaultMachine(
@@ -114,12 +124,8 @@ class SolluzManager {
     }
 
     var machineDataList = ArrayList<MachineData>()
-    val data = MutableLiveData<ArrayList<String>>().apply {
-        value = ArrayList()
-    }
-    val push = MutableLiveData<ArrayList<String>>().apply {
-        value = ArrayList()
-    }
+    val data = MutableLiveData<ArrayList<String>>()
+    val push = MutableLiveData<ArrayList<String>>()
     var lastUpdateTime = ArrayList<String>()
 
     fun dataUpdated(machineID: Int, pData: String) {
@@ -127,6 +133,7 @@ class SolluzManager {
         updateData(data, machineID, pData)
     }
 
+    @SuppressLint("SimpleDateFormat")
     fun pushUpdated(machineID: Int, pPush: String) {
         Log.i(TAG, "pushUpdated : $pPush")
         val datas = pPush.split(",")
@@ -150,7 +157,7 @@ class SolluzManager {
             lastUpdateTime.add(machineID, newDate)
         } else if (lastUpdateTime[machineID] != newDate) {
             updateNotification(content, newDate)
-            lastUpdateTime.set(machineID, newDate)
+            lastUpdateTime[machineID] = newDate
         }
     }
 
@@ -165,12 +172,60 @@ class SolluzManager {
         machineID: Int,
         value: String
     ) {
-        if (data.value?.lastIndex!! < machineID) {
-            data.value?.add(machineID, value)
-        } else {
-            data.value?.set(machineID, value)
-        }
+        data.value?.set(machineID, value)
         data.postValue(data.value)
     }
 
+    fun removeMachine(context: Context, intArray: ArrayList<Int>) {
+        stopMonitoring()
+        var currentMachineIndex = 0
+
+        intArray.forEachIndexed { index, machineID ->
+            currentMachineIndex = if (index > currentMachineIndex) index else currentMachineIndex
+
+            for(i in currentMachineIndex .. machineDataList.lastIndex) {
+                if(intArray.contains(i))
+                    currentMachineIndex++
+                else
+                    break;
+            }
+            if (currentMachineIndex <= machineDataList.lastIndex) {
+                movePreference(context, currentMachineIndex, index)
+            }
+        }
+
+        for(i in machineDataList.lastIndex downTo machineDataList.size - intArray.size) {
+            removePreference(context, i)
+        }
+        startMoritoring()
+    }
+
+    @SuppressLint("ApplySharedPref")
+    private fun movePreference(context: Context, from: Int, to: Int) {
+        val pref = PreferenceManager.getDefaultSharedPreferences(context)
+        pref.edit()?.apply {
+            putString(context.getString(R.string.pref_key_url_text) + to,
+                pref.getString(context.getString(R.string.pref_key_url_text) + from, ""))
+            putString(context.getString(R.string.pref_key_company_code_text) + to,
+                pref.getString(context.getString(R.string.pref_key_company_code_text) + from, ""))
+            putString(context.getString(R.string.pref_key_interval_list) + to,
+                pref.getString(context.getString(R.string.pref_key_interval_list) + from, ""))
+            putBoolean(context.getString(R.string.pref_key_push_switch) + to,
+                pref.getBoolean(context.getString(R.string.pref_key_push_switch) + from, true))
+            commit()
+        }
+    }
+
+    @SuppressLint("ApplySharedPref")
+    private fun removePreference(context: Context, machineID: Int) {
+        val pref = PreferenceManager.getDefaultSharedPreferences(context)
+
+        pref.edit()?.apply {
+            remove(context.getString(R.string.pref_key_url_text) + machineID)
+            remove(context.getString(R.string.pref_key_company_code_text) + machineID)
+            remove(context.getString(R.string.pref_key_interval_list) + machineID)
+            remove(context.getString(R.string.pref_key_push_switch) + machineID)
+            commit()
+        }
+    }
 }

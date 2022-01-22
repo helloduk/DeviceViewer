@@ -6,7 +6,6 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationManagerCompat
@@ -38,9 +37,11 @@ class NotificationManager private constructor() {
             val importance = NotificationManager.IMPORTANCE_DEFAULT
             val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
                 description = descriptionText
+                setSound(null, null)
             }
 
-            val notificationManager: NotificationManager = SolluzApplication.context().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val notificationManager = SolluzApplication.context()
+                .getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
         }
     }
@@ -54,12 +55,12 @@ class NotificationManager private constructor() {
         val pendingIntent: PendingIntent = PendingIntent.getActivity(context, 0, intent, 0)
 
         var mBuilder = NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_solluzfa)
-                .setContentTitle(title)
-                .setContentText(summary)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setContentIntent(pendingIntent)
-                .setAutoCancel(true)
+            .setSmallIcon(R.drawable.ic_solluzfa)
+            .setContentTitle(title)
+            .setContentText(summary)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
 
         with(NotificationManagerCompat.from(context)) {
             notify(pushNotificationID, mBuilder.build())
@@ -74,8 +75,9 @@ class NotificationManager private constructor() {
         }
         val pendingIntent: PendingIntent = PendingIntent.getActivity(context, 0, intent, 0)
 
-        val remoteViews = RemoteViews(context.getPackageName(),
-                R.layout.remoteview_layout
+        val remoteViews = RemoteViews(
+            context.getPackageName(),
+            R.layout.remoteview_layout
         ).apply {
             val intent = Intent(context, SolluzService::class.java)
             intent.action = InjectorUtils.STOP_SERVICE
@@ -83,10 +85,10 @@ class NotificationManager private constructor() {
             setOnClickPendingIntent(R.id.cancel_monitoring, pendingIntent)
         }
         val mBuilder = NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_solluzfa)
-                .setContent(remoteViews)
-                .setSound(null)
-                .setContentIntent(pendingIntent)
+            .setSmallIcon(R.drawable.ic_solluzfa)
+            .setContent(remoteViews)
+            .setSound(null)
+            .setContentIntent(pendingIntent)
         return mBuilder.build()
     }
 }

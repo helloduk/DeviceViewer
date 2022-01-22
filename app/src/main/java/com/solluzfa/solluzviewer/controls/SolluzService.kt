@@ -14,8 +14,8 @@ class SolluzService : Service() {
     val notificationManager = NotificationManager.getInstance()
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        Log.i(TAG, "onStartCommand " + intent!!.action)
-        when (intent!!.action) {
+        Log.i(TAG, "onStartCommand " + intent?.action)
+        when (intent?.action) {
             InjectorUtils.STOP_SERVICE -> {
                 solluzManager.stopMonitoring()
                 stopForeground(true)

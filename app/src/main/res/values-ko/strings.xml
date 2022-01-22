@@ -10,15 +10,14 @@
     <string name="title_activity_settings">설정</string>
     <string name="now_monitoring">상태 감시중..</string>
     <string name="add_machine">기기 추가</string>
+    <string name="machine_list">기기 목록</string>
+    <string name="remove_machine">기기 삭제</string>
+    <string name="select_all">전체 선택</string>
 
     <!-- Strings related to Settings -->
     <string name="pref_title_push_notification">Push notification</string>
-    <string name="pref_description_push_notification">Push Notification을 표시합니다
-    </string>
-
+    <string name="pref_description_push_notification">Push Notification을 표시합니다</string>
     <string name="pref_title_url_address">URL 주소</string>
     <string name="pref_title_company_code">업체코드</string>
     <string name="pref_title_select_interval">데이터 수집 간격</string>
-    <string name="machine_list">기기 목록</string>
-
 </resources>

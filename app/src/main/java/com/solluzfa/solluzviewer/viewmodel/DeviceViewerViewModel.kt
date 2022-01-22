@@ -4,6 +4,7 @@ import android.arch.lifecycle.Lifecycle
 import android.arch.lifecycle.LifecycleObserver
 import android.arch.lifecycle.OnLifecycleEvent
 import android.arch.lifecycle.ViewModel
+import android.content.Context
 import com.solluzfa.solluzviewer.Log
 import com.solluzfa.solluzviewer.controls.SolluzManager
 
@@ -15,6 +16,10 @@ class DeviceViewerViewModel(private val solluzManager: SolluzManager) : ViewMode
 
     fun getData() = solluzManager.data
     fun getPush() = solluzManager.push
+
+    fun removeMachine(context: Context, intArray: ArrayList<Int>) {
+        solluzManager.removeMachine(context, intArray)
+    }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun onCreate() {

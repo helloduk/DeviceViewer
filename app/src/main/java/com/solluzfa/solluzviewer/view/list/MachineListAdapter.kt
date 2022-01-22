@@ -2,7 +2,9 @@ package com.solluzfa.solluzviewer.view.list
 
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.CheckBox
 import android.widget.TextView
 import com.solluzfa.solluzviewer.databinding.FragmentMachineListItemBinding
 import com.solluzfa.solluzviewer.view.list.MachineListContent.PlaceholderItem
@@ -13,8 +15,9 @@ class MachineListAdapter(
     private val fragment: MachineListFragment
 ) : RecyclerView.Adapter<MachineListAdapter.ViewHolder>() {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+    var showCheckBox: Boolean = false
 
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
             FragmentMachineListItemBinding.inflate(
                 LayoutInflater.from(parent.context),
@@ -42,12 +45,26 @@ class MachineListAdapter(
                 fragment.transact(position)
             }
         }
+
+        if (showCheckBox) {
+            with(holder.checkBoxView) {
+                isChecked = item.deleteChecked
+                visibility = View.VISIBLE
+                setOnCheckedChangeListener { _, isChecked ->
+                    item.deleteChecked = isChecked
+                    fragment.updateDeleteAllState()
+                }
+            }
+        } else {
+            holder.checkBoxView.visibility = View.GONE
+        }
     }
 
     override fun getItemCount(): Int = values.size
 
     inner class ViewHolder(binding: FragmentMachineListItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
+        val checkBoxView: CheckBox = binding.deleteCheckBox
         val titleView: TextView = binding.titleTextView
         val valueView: TextView = binding.valueTextView
 
