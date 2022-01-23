@@ -52,7 +52,7 @@ class SolluzManager {
             val time = pref.getString(
                 applicationContext.getString(R.string.pref_key_interval_list) + machineCount,
                 "1000"
-            )?.toLong()
+            )?.toLongOrNull() ?: 1000
             val push = pref.getBoolean(
                 applicationContext.getString(R.string.pref_key_push_switch) + machineCount,
                 true
@@ -60,12 +60,12 @@ class SolluzManager {
 
             Log.i(TAG, "address: $address, code: $code, time: $time, push: $push")
 
-            if (address == "") {
+            if (address?.isEmpty() != false) {
                 break;
             } else {
                 machineDataList.add(
                     machineCount,
-                    MachineData(machineCount).apply { updateSetting(address, code, time!!, push) })
+                    MachineData(machineCount).apply { updateSetting(address, code, time, push) })
                 machineCount++
             }
         }
@@ -75,7 +75,7 @@ class SolluzManager {
         }
 
         initData()
-        Log.i(TAG, "updateSetting : ${machineDataList.size}")
+        Log.i(TAG, "updateSetting: Machine count: ${machineDataList.size}")
         return true
     }
 
@@ -176,7 +176,7 @@ class SolluzManager {
         data.postValue(data.value)
     }
 
-    fun removeMachine(context: Context, intArray: ArrayList<Int>) {
+    fun removeMachines(context: Context, intArray: ArrayList<Int>) {
         stopMonitoring()
         var currentMachineIndex = 0
 

@@ -3,10 +3,10 @@ package com.solluzfa.solluzviewer.view.list
 import android.annotation.SuppressLint
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v7.view.menu.MenuBuilder
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -53,26 +53,48 @@ class MachineListFragment : Fragment(), IOnBackPressed {
 
     @SuppressLint("NotifyDataSetChanged")
     private fun updateView(eachMachineDataList: ArrayList<String>) {
+        Log.i(TAG, "MachineListContent.ITEMS.size ${MachineListContent.ITEMS.size}" +
+                ", eachMachineDataList.size ${eachMachineDataList.size}")
+
         if (eachMachineDataList.size != MachineListContent.ITEMS.size) {
             MachineListContent.ITEMS.clear()
             for (i in 0 until eachMachineDataList.size) {
                 tempTitle = DataParser.parse(eachMachineDataList[i], tempItems)
-                MachineListContent.ITEMS.add(
-                    MachineListContent.PlaceholderItem(
-                        tempTitle,
-                        tempItems[0].tt, tempItems[0].tb, tempItems[0].tf, tempItems[0].ta
+                if (tempItems.size > 2) {
+                    MachineListContent.ITEMS.add(
+                        MachineListContent.PlaceholderItem(
+                            tempTitle,
+                            tempItems[0].tt, tempItems[0].tb, tempItems[0].tf, tempItems[0].ta,
+                            tempItems[2].tt, tempItems[2].tb, tempItems[2].tf, tempItems[2].ta
+                        )
                     )
-                )
+                } else if (tempItems.size > 0) {
+                    MachineListContent.ITEMS.add(
+                        MachineListContent.PlaceholderItem(
+                            tempTitle,
+                            tempItems[0].tt, tempItems[0].tb, tempItems[0].tf, tempItems[0].ta
+                        )
+                    )
+                }
             }
         } else {
             for (i in 0 until eachMachineDataList.size) {
                 tempTitle = DataParser.parse(eachMachineDataList[i], tempItems)
                 with(MachineListContent.ITEMS[i]) {
                     title = tempTitle
-                    tt = tempItems[0].tt
-                    tb = tempItems[0].tb
-                    tf = tempItems[0].tf
-                    ta = tempItems[0].ta
+                    if (tempItems.size > 0) {
+                        tt = tempItems[0].tt
+                        tb = tempItems[0].tb
+                        tf = tempItems[0].tf
+                        ta = tempItems[0].ta
+                    }
+
+                    if (tempItems.size > 2) {
+                        ftt = tempItems[2].tt
+                        ftb = tempItems[2].tb
+                        ftf = tempItems[2].tf
+                        fta = tempItems[2].ta
+                    }
                 }
             }
         }
@@ -125,14 +147,18 @@ class MachineListFragment : Fragment(), IOnBackPressed {
                     intArray.add(index)
                 }
             }
-            activity?.let { it1 -> mViewModel.removeMachine(it1, intArray) }
+            activity?.let { it1 -> mViewModel.removeMachines(it1, intArray) }
         }
 
         return view
     }
 
+    @SuppressLint("RestrictedApi")
     override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
         super.onCreateOptionsMenu(menu, inflater)
+        if (menu is MenuBuilder) {
+            menu.setOptionalIconsVisible(true)
+        }
         inflater?.inflate(R.menu.list_menu, menu)
     }
 

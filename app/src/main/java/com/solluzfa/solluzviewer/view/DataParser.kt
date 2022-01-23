@@ -14,10 +14,14 @@ object DataParser {
 
         val datas = data.split(";")
 
-        val valueData = datas[0]?.split(",")
-        val layoutData = datas[1]?.split(",")
+        if (datas.size != 2) {
+            return null
+        }
 
-        val rows = valueData?.get(0)?.substringAfterLast(":")?.toIntOrNull()
+        val valueData = datas[0].split(",")
+        val layoutData = datas[1].split(",")
+
+        val rows = valueData.get(0).substringAfterLast(":")?.toIntOrNull()
 
         if (rows == null) {
             return null

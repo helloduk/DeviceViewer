@@ -36,10 +36,19 @@ class MachineListAdapter(
             }
         }
 
-        with(holder.valueView) {
+        with(holder.stateTextView) {
             setBackgroundColor(item.tb)
             setTextColor(item.tf)
             text = item.tt
+            gravity = item.ta
+            setOnClickListener {
+                fragment.transact(position)
+            }
+        }
+
+        with(holder.failedTextView) {
+            setTextColor(item.ftf)
+            text = item.ftt
             gravity = item.ta
             setOnClickListener {
                 fragment.transact(position)
@@ -66,10 +75,11 @@ class MachineListAdapter(
         RecyclerView.ViewHolder(binding.root) {
         val checkBoxView: CheckBox = binding.deleteCheckBox
         val titleView: TextView = binding.titleTextView
-        val valueView: TextView = binding.valueTextView
+        val stateTextView: TextView = binding.stateTextView
+        val failedTextView: TextView = binding.failedTextView
 
         override fun toString(): String {
-            return super.toString() + " '" + valueView.text + "'"
+            return super.toString() + " '" + stateTextView.text + "'"
         }
     }
 

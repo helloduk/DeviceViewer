@@ -13,5 +13,6 @@ object InjectorUtils {
     const val STOP_SERVICE = "stop_service"
     const val UPDATE_SETTINGS = "update_settings"
 
+    const val EXTRA_KEY_IS_ADD_MACHINE = "add_machine"
     const val EXTRA_KEY_MACHINE_ID = "machine_id"
 }
