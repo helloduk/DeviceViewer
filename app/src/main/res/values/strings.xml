@@ -40,6 +40,7 @@
     <string name="select_all">Select all</string>
     <string name="save">Save</string>
     <string name="cancel">Cancel</string>
+    <string name="updating">Updating…</string>
     <string-array name="pref_list_reading_interval_titles">
         <item>None</item>
         <item>1 sec</item>

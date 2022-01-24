@@ -22,4 +22,5 @@
     <string name="pref_title_select_interval">데이터 수집 간격</string>
     <string name="save">저장</string>
     <string name="cancel">Cancel</string>
+    <string name="updating">업데이트중…</string>
 </resources>

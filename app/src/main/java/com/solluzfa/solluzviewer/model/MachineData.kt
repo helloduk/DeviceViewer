@@ -35,7 +35,7 @@ class MachineData(val machineID: Int) {
     private var LayoutAddress = URL("http://solluz.iptime.org/Data/MachineData2_Layout.txt");
     private var PushAddress = URL("http://solluz.iptime.org/Data/MachineData2_Push.txt");
 
-    //private val UrlAddress = URL("https://helloduk.github.io/MachineData1.txt");
+    //private val UrlAddress = URL("https://helloduk.github.io/solluzfa/MachineData1.txt");
     lateinit var dataDisposable: Disposable
     lateinit var pushDisposable: Disposable
 
@@ -178,7 +178,7 @@ class MachineData(val machineID: Int) {
     }
 
     fun clear() {
-        Log.i(TAG, "clear")
+        Log.i(TAG, "clear machineID: $machineID")
         if (::dataDisposable.isInitialized) {
             if (!dataDisposable.isDisposed) dataDisposable.dispose()
         }

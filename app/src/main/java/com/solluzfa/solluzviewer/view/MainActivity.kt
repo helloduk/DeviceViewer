@@ -4,6 +4,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import com.solluzfa.solluzviewer.R
+import com.solluzfa.solluzviewer.controls.NotificationManager
+import com.solluzfa.solluzviewer.controls.SolluzManager
 import com.solluzfa.solluzviewer.controls.SolluzService
 import com.solluzfa.solluzviewer.view.detail.MainFragment
 import com.solluzfa.solluzviewer.view.list.MachineListFragment
@@ -18,6 +20,14 @@ class MainActivity : AppCompatActivity(), MainFragment.OnListFragmentInteraction
             .replace(R.id.content_main, MachineListFragment.newInstance(1)).commit()
 //        supportFragmentManager.beginTransaction()
 //            .replace(R.id.content_main, MainFragment.newInstance(0, 1)).commit()
+//        val sharedPreferences = getSharedPreferences(getString(R.string.solluz_preference_name), 0)
+
+//        if (!sharedPreferences!!.getBoolean(getString(R.string.channel_register_pref), false)) {
+            NotificationManager.getInstance().creteNotificationChannel(this)
+//            sharedPreferences.edit().putBoolean(getString(R.string.channel_register_pref), true)
+//                .commit()
+//        }
+
         startService(Intent(this, SolluzService::class.java))
     }
 

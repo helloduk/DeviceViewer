@@ -5,7 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-
     <TextView
         android:id="@+id/device_name"
         android:layout_width="match_parent"
@@ -33,12 +32,11 @@
     <RelativeLayout
         android:id="@+id/push_view"
         android:layout_width="match_parent"
-        android:layout_above="@+id/logo_layout"
+        android:layout_alignParentBottom="true"
         android:layout_height="@dimen/item_height"
         android:layout_margin="5dp"
         android:padding = "5dp"
-        android:background="#aaaaaa"
-        >
+        android:background="#aaaaaa">
         <TextView
             android:id="@+id/push_view_value"
             android:layout_width="match_parent"
@@ -50,28 +48,4 @@
             android:maxLines="2"
             android:textSize="18sp" />
     </RelativeLayout>
-
-    <LinearLayout
-        android:id="@+id/logo_layout"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/state_height"
-        android:orientation="vertical"
-        android:layout_alignParentBottom="true"
-        android:gravity="center"
-        android:background="#ffffff">
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:srcCompat="@drawable/solluzfa" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/home_url" />
-
-    </LinearLayout>
-
-
-
-
 </RelativeLayout>

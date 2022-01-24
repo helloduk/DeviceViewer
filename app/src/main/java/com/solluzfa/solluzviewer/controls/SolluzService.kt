@@ -10,14 +10,20 @@ import kotlin.system.exitProcess
 
 class SolluzService : Service() {
     val TAG = "SolluzService"
-    val solluzManager = SolluzManager.getInstance()
-    val notificationManager = NotificationManager.getInstance()
+    private var solluzManager: SolluzManager? = null
+    private var notificationManager: NotificationManager? = null
+
+    override fun onCreate() {
+        super.onCreate()
+        solluzManager = SolluzManager.getInstance(this)
+        notificationManager = NotificationManager.getInstance()
+    }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.i(TAG, "onStartCommand " + intent?.action)
         when (intent?.action) {
             InjectorUtils.STOP_SERVICE -> {
-                solluzManager.stopMonitoring()
+                solluzManager?.stopMonitoring()
                 stopForeground(true)
                 val closeIntent = Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
                 sendBroadcast(closeIntent)
@@ -26,28 +32,19 @@ class SolluzService : Service() {
                 exitProcess(1);
             }
             InjectorUtils.UPDATE_SETTINGS -> {
-                if (updateSetting()) {
-                    startForeground(1, notificationManager.getMonitoringNotification())
-                } else {
-                    stopForeground(true)
-                }
-                solluzManager.startMoritoring()
+                updateSetting()
             }
             else -> {
-                if (updateSetting()) {
-                    startForeground(1, notificationManager.getMonitoringNotification())
-                } else {
-                    stopForeground(true)
-                }
-                solluzManager.startMoritoring()
+                updateSetting()
+                startForeground(1, notificationManager?.getMonitoringNotification(this))
             }
         }
 
         return super.onStartCommand(intent, flags, startId)
     }
 
-    fun updateSetting(): Boolean {
-        return solluzManager.updateSetting(applicationContext)
+    private fun updateSetting(){
+        solluzManager?.updateSetting()
     }
 
     override fun onBind(intent: Intent): IBinder {

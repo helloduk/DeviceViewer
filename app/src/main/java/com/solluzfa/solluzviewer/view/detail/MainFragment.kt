@@ -36,7 +36,8 @@ class MainFragment : Fragment(), IOnBackPressed {
     private val items: MutableList<DataParser.Item> = ArrayList()
 
     private val mViewModel: DeviceViewerViewModel by lazy {
-        ViewModelProviders.of(this, InjectorUtils.provideDeviceViewerViewModelFactory())
+        ViewModelProviders.of(this,
+            activity?.let { InjectorUtils.provideDeviceViewerViewModelFactory(it) })
             .get(DeviceViewerViewModel::class.java)
     }
 
@@ -126,9 +127,14 @@ class MainFragment : Fragment(), IOnBackPressed {
     private fun pushUpdateView(data: String) {
         val datas = data.split(",");
         datas?.let {
-            val time = datas[0]
-            val content = datas[1]
-            push_view_value.text = "$time  $content"
+            if (datas.size > 0) {
+                val time = datas[0]
+                var content:String = ""
+                if (datas.size > 1) {
+                    content = datas[1]
+                }
+                push_view_value.text = "$time  $content"
+            }
         }
     }
 

@@ -46,7 +46,8 @@ class MachineListAdapter(
             }
         }
 
-        with(holder.failedTextView) {
+        with(holder.finalTextView) {
+            setBackgroundColor(item.ftb)
             setTextColor(item.ftf)
             text = item.ftt
             gravity = item.ta
@@ -55,12 +56,14 @@ class MachineListAdapter(
             }
         }
 
+        holder.checkBoxView.tag = position
+
         if (showCheckBox) {
             with(holder.checkBoxView) {
                 isChecked = item.deleteChecked
                 visibility = View.VISIBLE
-                setOnCheckedChangeListener { _, isChecked ->
-                    item.deleteChecked = isChecked
+                setOnCheckedChangeListener { checkbox, isChecked ->
+                    values[checkbox.tag as Int].deleteChecked = isChecked
                     fragment.updateDeleteAllState()
                 }
             }
@@ -76,7 +79,7 @@ class MachineListAdapter(
         val checkBoxView: CheckBox = binding.deleteCheckBox
         val titleView: TextView = binding.titleTextView
         val stateTextView: TextView = binding.stateTextView
-        val failedTextView: TextView = binding.failedTextView
+        val finalTextView: TextView = binding.finalTextView
 
         override fun toString(): String {
             return super.toString() + " '" + stateTextView.text + "'"

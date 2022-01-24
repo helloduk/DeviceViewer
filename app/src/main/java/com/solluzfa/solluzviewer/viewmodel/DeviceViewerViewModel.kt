@@ -17,8 +17,8 @@ class DeviceViewerViewModel(private val solluzManager: SolluzManager) : ViewMode
     fun getData() = solluzManager.data
     fun getPush() = solluzManager.push
 
-    fun removeMachines(context: Context, intArray: ArrayList<Int>) {
-        solluzManager.removeMachines(context, intArray)
+    fun removeMachines(intArray: ArrayList<Int>) {
+        solluzManager.removeMachines(intArray)
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)

@@ -1,10 +1,13 @@
 package com.solluzfa.solluzviewer.view.list
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
+import android.app.Dialog
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
 import android.support.v4.app.Fragment
 import android.support.v7.view.menu.MenuBuilder
 import android.support.v7.widget.GridLayoutManager
@@ -23,9 +26,13 @@ import com.solluzfa.solluzviewer.view.IOnBackPressed
 import com.solluzfa.solluzviewer.view.detail.MainFragment
 import com.solluzfa.solluzviewer.view.setting.SettingsActivity
 import com.solluzfa.solluzviewer.viewmodel.DeviceViewerViewModel
+import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_machine_list.*
 import java.util.*
+import java.util.concurrent.TimeUnit
+import kotlin.concurrent.schedule
 
 /**
  * A fragment representing a list of Items.
@@ -33,9 +40,11 @@ import java.util.*
 class MachineListFragment : Fragment(), IOnBackPressed {
 
     private var columnCount = 1
+    var dialog: Dialog? = null
 
     private val mViewModel: DeviceViewerViewModel by lazy {
-        ViewModelProviders.of(this, InjectorUtils.provideDeviceViewerViewModelFactory())
+        ViewModelProviders.of(this,
+            activity?.let { InjectorUtils.provideDeviceViewerViewModelFactory(it) })
             .get(DeviceViewerViewModel::class.java)
     }
 
@@ -60,19 +69,19 @@ class MachineListFragment : Fragment(), IOnBackPressed {
             MachineListContent.ITEMS.clear()
             for (i in 0 until eachMachineDataList.size) {
                 tempTitle = DataParser.parse(eachMachineDataList[i], tempItems)
-                if (tempItems.size > 2) {
+                if (tempItems.size > FINAL_INDEX) {
                     MachineListContent.ITEMS.add(
                         MachineListContent.PlaceholderItem(
                             tempTitle,
-                            tempItems[0].tt, tempItems[0].tb, tempItems[0].tf, tempItems[0].ta,
-                            tempItems[2].tt, tempItems[2].tb, tempItems[2].tf, tempItems[2].ta
+                            tempItems[TITLE_INDEX].tt, tempItems[TITLE_INDEX].tb, tempItems[TITLE_INDEX].tf, tempItems[TITLE_INDEX].ta,
+                            tempItems[FINAL_INDEX].tt, tempItems[FINAL_INDEX].tb, tempItems[FINAL_INDEX].tf, tempItems[FINAL_INDEX].ta
                         )
                     )
-                } else if (tempItems.size > 0) {
+                } else if (tempItems.size > TITLE_INDEX) {
                     MachineListContent.ITEMS.add(
                         MachineListContent.PlaceholderItem(
                             tempTitle,
-                            tempItems[0].tt, tempItems[0].tb, tempItems[0].tf, tempItems[0].ta
+                            tempItems[TITLE_INDEX].tt, tempItems[TITLE_INDEX].tb, tempItems[TITLE_INDEX].tf, tempItems[TITLE_INDEX].ta
                         )
                     )
                 }
@@ -82,18 +91,18 @@ class MachineListFragment : Fragment(), IOnBackPressed {
                 tempTitle = DataParser.parse(eachMachineDataList[i], tempItems)
                 with(MachineListContent.ITEMS[i]) {
                     title = tempTitle
-                    if (tempItems.size > 0) {
-                        tt = tempItems[0].tt
-                        tb = tempItems[0].tb
-                        tf = tempItems[0].tf
-                        ta = tempItems[0].ta
+                    if (tempItems.size > TITLE_INDEX) {
+                        tt = tempItems[TITLE_INDEX].tt
+                        tb = tempItems[TITLE_INDEX].tb
+                        tf = tempItems[TITLE_INDEX].tf
+                        ta = tempItems[TITLE_INDEX].ta
                     }
 
-                    if (tempItems.size > 2) {
-                        ftt = tempItems[2].tt
-                        ftb = tempItems[2].tb
-                        ftf = tempItems[2].tf
-                        fta = tempItems[2].ta
+                    if (tempItems.size > FINAL_INDEX) {
+                        ftt = tempItems[FINAL_INDEX].tt
+                        ftb = tempItems[FINAL_INDEX].tb
+                        ftf = tempItems[FINAL_INDEX].tf
+                        fta = tempItems[FINAL_INDEX].ta
                     }
                 }
             }
@@ -111,6 +120,7 @@ class MachineListFragment : Fragment(), IOnBackPressed {
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -130,7 +140,7 @@ class MachineListFragment : Fragment(), IOnBackPressed {
                     else -> GridLayoutManager(context, columnCount)
                 }
                 adapter = MachineListAdapter(MachineListContent.ITEMS, this@MachineListFragment)
-                addItemDecoration(RecyclerHeightDecoration(3))
+                addItemDecoration(RecyclerHeightDecoration(15))
             }
         }
 
@@ -138,19 +148,39 @@ class MachineListFragment : Fragment(), IOnBackPressed {
             MachineListContent.ITEMS.forEach {
                 it.deleteChecked = (checkBox as CheckBox).isChecked
             }
+            machineListView.adapter?.notifyDataSetChanged()
         }
 
         deleteButtonView.setOnClickListener {
             val intArray = ArrayList<Int>()
             MachineListContent.ITEMS.forEachIndexed { index, placeholderItem ->
                 if (placeholderItem.deleteChecked) {
+                    Log.i(TAG, "Delete Item machineID: $index")
                     intArray.add(index)
                 }
             }
-            activity?.let { it1 -> mViewModel.removeMachines(it1, intArray) }
+            showProgressBarShortly()
+            mViewModel.removeMachines(intArray)
+            toggleDeleteMachineView(false)
         }
 
         return view
+    }
+
+    @SuppressLint("CheckResult")
+    private fun showProgressBarShortly() {
+        dialog?.show()
+        Timer().schedule(1000) {
+            dialog?.dismiss()
+        }
+    }
+
+    @SuppressLint("NewApi")
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val builder: AlertDialog.Builder = AlertDialog.Builder(context)
+        builder.setView(R.layout.progress)
+        dialog = builder.create()
     }
 
     @SuppressLint("RestrictedApi")
@@ -189,6 +219,9 @@ class MachineListFragment : Fragment(), IOnBackPressed {
 
         const val ARG_COLUMN_COUNT = "column-count"
 
+        const val TITLE_INDEX = 0
+        const val FINAL_INDEX = 4
+
         @JvmStatic
         fun newInstance(columnCount: Int) =
             MachineListFragment().apply {
@@ -217,6 +250,7 @@ class MachineListFragment : Fragment(), IOnBackPressed {
             notifyDataSetChanged()
             if (!show) MachineListContent.ITEMS.forEach {
                 it.deleteChecked = false
+                selectAllCheckBox.isChecked = false
             }
         }
     }

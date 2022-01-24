@@ -11,7 +11,6 @@ import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationManagerCompat
 import android.widget.RemoteViews
 import com.solluzfa.solluzviewer.R
-import com.solluzfa.solluzviewer.SolluzApplication
 import com.solluzfa.solluzviewer.utils.InjectorUtils
 import com.solluzfa.solluzviewer.view.MainActivity
 
@@ -25,29 +24,24 @@ class NotificationManager private constructor() {
     }
 
     private val pushNotificationID = 0
-    private val doingNotificationID = 1
 
-    private val CHANNEL_ID = SolluzApplication.context().packageName
+    private val CHANNEL_ID = "com.solluzfa.solluzviewer"
 
     // It Should be worked only one time
-    fun creteNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = CHANNEL_ID
-            val descriptionText = CHANNEL_ID
-            val importance = NotificationManager.IMPORTANCE_DEFAULT
-            val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
-                description = descriptionText
-                setSound(null, null)
-            }
-
-            val notificationManager = SolluzApplication.context()
-                .getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
+    fun creteNotificationChannel(context: Context) {
+        val name = CHANNEL_ID
+        val descriptionText = CHANNEL_ID
+        val importance = NotificationManager.IMPORTANCE_DEFAULT
+        val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
+            description = descriptionText
+//                setSound(null, null)
         }
+
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
     }
 
-    fun makeNotification(title: String, summary: String) {
-        val context = SolluzApplication.context()
+    fun makeNotification(context: Context, title: String, summary: String) {
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
@@ -68,15 +62,14 @@ class NotificationManager private constructor() {
 
     }
 
-    fun getMonitoringNotification(): Notification {
-        val context = SolluzApplication.context()
+    fun getMonitoringNotification(context: Context): Notification {
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
         val pendingIntent: PendingIntent = PendingIntent.getActivity(context, 0, intent, 0)
 
         val remoteViews = RemoteViews(
-            context.getPackageName(),
+            context.packageName,
             R.layout.remoteview_layout
         ).apply {
             val intent = Intent(context, SolluzService::class.java)

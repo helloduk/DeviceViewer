@@ -1,6 +1,9 @@
 package com.solluzfa.solluzviewer.view.setting
 
+import android.annotation.SuppressLint
 import android.annotation.TargetApi
+import android.app.AlertDialog
+import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
@@ -15,30 +18,27 @@ import com.solluzfa.solluzviewer.R
 import com.solluzfa.solluzviewer.controls.SolluzService
 import com.solluzfa.solluzviewer.utils.InjectorUtils
 import com.solluzfa.solluzviewer.utils.InjectorUtils.EXTRA_KEY_MACHINE_ID
-import com.solluzfa.solluzviewer.view.MainActivity
+import java.util.*
+import kotlin.concurrent.schedule
 
 class SettingsActivity : AppCompatPreferenceActivity() {
+    var dialog: Dialog? = null
 
+    @SuppressLint("NewApi")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setupActionBar()
         machineID = intent.getIntExtra(EXTRA_KEY_MACHINE_ID, 99)
         fragmentManager.beginTransaction()
             .replace(android.R.id.content, GeneralPreferenceFragment()).commit()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        val intent = Intent(this, SolluzService::class.java).also {
-            it.action = InjectorUtils.UPDATE_SETTINGS
-        }
-        startService(intent)
+        val builder: AlertDialog.Builder = AlertDialog.Builder(this)
+        builder.setView(R.layout.progress)
+        dialog = builder.create()
     }
 
     private fun setupActionBar() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
-
 
     override fun onIsMultiPane(): Boolean {
         return isXLargeTablet(this)
@@ -59,7 +59,7 @@ class SettingsActivity : AppCompatPreferenceActivity() {
         }
 
         private fun setValueValue() {
-            putPreference(machineID.toString(), "")
+            putPreference(machineID.toString(), "", true)
 
             bindPreferenceSummaryToValue(findPreference(resources.getString(R.string.pref_key_url_text)))
             bindPreferenceSummaryToValue(findPreference(resources.getString(R.string.pref_key_company_code_text)))
@@ -75,15 +75,29 @@ class SettingsActivity : AppCompatPreferenceActivity() {
             val id = item.itemId
             return if (id == R.id.save) {
                 putPreference("", machineID.toString())
-                startActivity(Intent(activity, MainActivity::class.java))
+                val intent = Intent(activity, SolluzService::class.java).also {
+                    it.action = InjectorUtils.UPDATE_SETTINGS
+                }
+                activity?.startService(intent)
+
+                if (activity is SettingsActivity) {
+                    (activity as SettingsActivity).dialog?.show()
+                    Timer().schedule(1000) {
+                        (activity as SettingsActivity).dialog?.dismiss()
+                        activity?.finish()
+                    }
+                }
                 true
             } else if (id == android.R.id.home) {
-                startActivity(Intent(activity, MainActivity::class.java))
+                activity?.finish()
                 true
             } else super.onOptionsItemSelected(item)
         }
 
-        private fun putPreference(from: String, to: String) {
+
+
+        @SuppressLint("NewApi", "ApplySharedPref")
+        private fun putPreference(from: String, to: String, setText: Boolean = false) {
             Log.i(TAG, "putPreference from: $from, to: $to")
 
             val uriTextKey = resources.getString(R.string.pref_key_url_text)
@@ -93,34 +107,35 @@ class SettingsActivity : AppCompatPreferenceActivity() {
 
             val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
             sharedPreferences.edit().apply {
-                putString(
-                    uriTextKey + to,
-                    sharedPreferences.getString(
-                        uriTextKey + from,
-                        resources.getString(R.string.pref_default_url_address)
-                    )
+                val uriValue = sharedPreferences.getString(
+                    uriTextKey + from,
+                    resources.getString(R.string.pref_default_url_address)
                 )
-                putString(
-                    companyCodeKey + to,
-                    sharedPreferences.getString(
-                        companyCodeKey + from,
-                        resources.getString(R.string.pref_default_company_code)
-                    )
+                putString(uriTextKey + to, uriValue)
+
+                val companyCodeValue = sharedPreferences.getString(
+                    companyCodeKey + from,
+                    resources.getString(R.string.pref_default_company_code)
                 )
-                putString(
-                    intervalKey + to,
-                    sharedPreferences.getString(
-                        intervalKey + from,
-                        resources.getString(R.string.pref_default_reading_interval)
-                    )
+                putString(companyCodeKey + to, companyCodeValue)
+
+                val intervalValue = sharedPreferences.getString(
+                    intervalKey + from,
+                    resources.getString(R.string.pref_default_reading_interval)
                 )
-                putBoolean(
-                    pushKey + to,
-                    sharedPreferences.getBoolean(
-                        pushKey + from, true
-                    )
-                )
+                putString(intervalKey + to, intervalValue)
+
+                val pushValue = sharedPreferences.getBoolean(pushKey + from, true)
+                putBoolean(pushKey + to, pushValue)
+
                 commit()
+
+                if (setText) {
+                    (findPreference(uriTextKey) as EditTextPreference).text = uriValue
+                    (findPreference(companyCodeKey) as EditTextPreference).text = companyCodeValue
+                    (findPreference(intervalKey) as ListPreference).value = intervalValue
+                    (findPreference(pushKey) as SwitchPreference).isChecked = pushValue
+                }
             }
         }
     }
@@ -134,15 +149,11 @@ class SettingsActivity : AppCompatPreferenceActivity() {
                 val stringValue = value.toString()
 
                 if (preference is ListPreference) {
-                    val listPreference = preference
-                    val index = listPreference.findIndexOfValue(stringValue)
+                    val index = preference.findIndexOfValue(stringValue)
                     preference.setSummary(
-                        if (index >= 0)
-                            listPreference.entries[index]
-                        else
-                            null
+                        if (index >= 0) preference.entries[index]
+                        else null
                     )
-
                 } else {
                     preference.summary = stringValue
                 }
