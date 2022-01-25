@@ -29,17 +29,14 @@ class DeviceViewerViewModel(private val solluzManager: SolluzManager) : ViewMode
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
     fun onResume() {
         Log.i(TAG, "OnResume")
-        solluzManager.state = Lifecycle.State.RESUMED
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
     fun onPause() {
         Log.i(TAG, "OnPause")
-        solluzManager.state = Lifecycle.State.STARTED
     }
 
     override fun onCleared() {
         super.onCleared()
-        solluzManager.state = Lifecycle.State.DESTROYED
     }
 }

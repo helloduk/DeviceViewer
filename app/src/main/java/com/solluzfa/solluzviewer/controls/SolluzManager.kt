@@ -4,8 +4,10 @@ import android.annotation.SuppressLint
 import android.arch.lifecycle.Lifecycle
 import android.arch.lifecycle.MutableLiveData
 import android.content.Context
+import android.content.SharedPreferences
 import android.preference.PreferenceManager
 import com.solluzfa.solluzviewer.Log
+import com.solluzfa.solluzviewer.SolluzApplication
 import com.solluzfa.solluzviewer.controls.SolluzPreferenceManager.Companion.getDefaultMachine
 import com.solluzfa.solluzviewer.controls.SolluzPreferenceManager.Companion.makeMachineList
 import com.solluzfa.solluzviewer.controls.SolluzPreferenceManager.Companion.removeMachinePreferences
@@ -41,7 +43,7 @@ class SolluzManager private constructor(val context: Context) {
 
     fun stopMonitoring() = machineDataList.forEach { m -> m.clear() }
 
-    fun updateSetting() {
+    fun updateSetting(immediatly: Boolean = false) {
         Log.i(TAG, "updateSetting: Machine count before: ${machineDataList.size}")
 
         stopMonitoring()
@@ -50,16 +52,25 @@ class SolluzManager private constructor(val context: Context) {
             forEach { it.clear() }
             clear()
         }
-        Timer().schedule(1000) {
-            val machineCount = makeMachineList(context, pref, machineDataList)
-            if (machineDataList.isEmpty()) {
-                machineDataList.add(getDefaultMachine(context, pref, machineCount))
-            }
-            initData()
 
-            startMoritoring()
-            Log.i(TAG, "updateSetting: Machine count after: ${machineDataList.size}")
+        if (immediatly) {
+            start(pref)
+        } else {
+            Timer().schedule(1000) {
+                start(pref)
+            }
         }
+    }
+
+    private fun start(pref: SharedPreferences) {
+        val machineCount = makeMachineList(context, pref, machineDataList)
+        if (machineDataList.isEmpty()) {
+            machineDataList.add(getDefaultMachine(context, pref, machineCount))
+        }
+        initData()
+
+        startMoritoring()
+        Log.i(TAG, "updateSetting: Machine count after: ${machineDataList.size}")
     }
 
     private fun initData() {
@@ -104,7 +115,7 @@ class SolluzManager private constructor(val context: Context) {
     }
 
     private fun updateNotification(content: String, newDate: String) {
-        if (state == Lifecycle.State.STARTED || state == Lifecycle.State.DESTROYED) {
+        if (!SolluzApplication.getInstance().isActivityShowing()) {
             notificationManager.makeNotification(context, content, newDate)
         }
     }

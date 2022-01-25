@@ -17,6 +17,8 @@ class SolluzService : Service() {
         super.onCreate()
         solluzManager = SolluzManager.getInstance(this)
         notificationManager = NotificationManager.getInstance()
+        solluzManager?.updateSetting(true)
+        startForeground(1, notificationManager?.getMonitoringNotification(this))
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -32,19 +34,17 @@ class SolluzService : Service() {
                 exitProcess(1);
             }
             InjectorUtils.UPDATE_SETTINGS -> {
-                updateSetting()
+                solluzManager?.updateSetting()
             }
             else -> {
-                updateSetting()
-                startForeground(1, notificationManager?.getMonitoringNotification(this))
             }
         }
 
         return super.onStartCommand(intent, flags, startId)
     }
 
-    private fun updateSetting(){
-        solluzManager?.updateSetting()
+    private fun updateSetting() {
+
     }
 
     override fun onBind(intent: Intent): IBinder {

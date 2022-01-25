@@ -10,6 +10,7 @@ import android.os.Build
 import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationManagerCompat
 import android.widget.RemoteViews
+import com.solluzfa.solluzviewer.Log
 import com.solluzfa.solluzviewer.R
 import com.solluzfa.solluzviewer.utils.InjectorUtils
 import com.solluzfa.solluzviewer.view.MainActivity
@@ -17,6 +18,8 @@ import com.solluzfa.solluzviewer.view.MainActivity
 
 class NotificationManager private constructor() {
     companion object {
+        private const val TAG = "NotificationManager"
+
         private var instance: com.solluzfa.solluzviewer.controls.NotificationManager? = null
         fun getInstance() = instance ?: synchronized(this) {
             NotificationManager().also { instance = it }
@@ -37,11 +40,15 @@ class NotificationManager private constructor() {
 //                setSound(null, null)
         }
 
+        Log.i(TAG, "createNotificationChannel: ")
+
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(channel)
     }
 
     fun makeNotification(context: Context, title: String, summary: String) {
+        Log.i(TAG, "makeNotification: title($title), summary($summary) ")
+
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
@@ -63,6 +70,7 @@ class NotificationManager private constructor() {
     }
 
     fun getMonitoringNotification(context: Context): Notification {
+        Log.i(TAG, "getMonitoringNotification:")
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }

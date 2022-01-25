@@ -28,7 +28,7 @@ class MainActivity : AppCompatActivity(), MainFragment.OnListFragmentInteraction
 //                .commit()
 //        }
 
-        startService(Intent(this, SolluzService::class.java))
+        startForegroundService(Intent(this, SolluzService::class.java))
     }
 
     override fun onListFragmentInteraction(item: DataParser.Item?) {

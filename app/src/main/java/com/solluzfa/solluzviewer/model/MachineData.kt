@@ -37,7 +37,6 @@ class MachineData(val machineID: Int) {
 
     //private val UrlAddress = URL("https://helloduk.github.io/solluzfa/MachineData1.txt");
     lateinit var dataDisposable: Disposable
-    lateinit var pushDisposable: Disposable
 
     lateinit var dataSubscriber: (Int, String) -> Unit
     lateinit var pushSubscriber: (Int, String) -> Unit
@@ -46,8 +45,6 @@ class MachineData(val machineID: Int) {
     private var pushOn: Boolean = true
 
     private val dObservable = Observable.defer { getDataObservable() }
-    private val lObservale = Observable.defer { getLayoutObservable() }
-    private val pObservale = Observable.defer { getPushObservable() }
 
     @SuppressLint("CheckResult")
     private fun getDataObservable(): Observable<String> {
@@ -56,7 +53,8 @@ class MachineData(val machineID: Int) {
             .switchMap { _ ->
                 //Original file is encoded by "euc-kr"
                 //Observable.just(DataAddress.readText(Charset.forName("euc-kr")))
-                Observable.just(readData(DataAddress))
+                Log.i(TAG, "machineID: $machineID DataObservable: switchMap.")
+                Observable.just(readData(DataAddress, LayoutAddress, PushAddress))
             }
             .doOnError { e ->
                 run {
@@ -73,68 +71,26 @@ class MachineData(val machineID: Int) {
                 true
             }
             .doOnNext { data -> Log.i(TAG, "DataUpdated. machineID: $machineID, $data") }
-            .observeOn(AndroidSchedulers.mainThread())
-    }
-
-    @SuppressLint("CheckResult")
-    private fun getLayoutObservable(): Observable<String> {
-        return Observable.interval(0L, interval, TimeUnit.MILLISECONDS)
-            .subscribeOn(Schedulers.io())
-            .switchMap { _ ->
-                //Original file is encoded by "euc-kr"
-                //Observable.just(LayoutAddress.readText(Charset.forName("euc-kr")))
-                Observable.just(readData(LayoutAddress))
-            }
-            .doOnError { e ->
-                run {
-                    e.printStackTrace()
-                    Observable.just(ERROR_PACKET)
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe { data ->
-                            dataSubscriber(machineID, data)
-                        }
-                }
-            }
-            .retry { _, _ ->
-                Thread.sleep(interval)
-                true
-            }
-            .doOnNext { data -> Log.i(TAG, "LayoutUpdated. machineID: $machineID, $data") }
-            .observeOn(AndroidSchedulers.mainThread())
-    }
-
-    @SuppressLint("CheckResult")
-    private fun getPushObservable(): Observable<String> {
-        return Observable.interval(0L, interval, TimeUnit.MILLISECONDS)
-            .subscribeOn(Schedulers.io())
-            .switchMap { _ ->
-                //Original file is encoded by "euc-kr"
-                //Observable.just(PushAddress.readText(Charset.forName("euc-kr")))
-                Observable.just(readData(PushAddress))
-            }
-            .doOnError { e ->
-                run {
-                    e.printStackTrace()
-                    Observable.just(PUSH_ERROR_PACKET)
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe { data ->
-                            pushSubscriber(machineID, data)
-                        }
-                }
-            }
-            .retry { _, _ ->
-                Thread.sleep(interval)
-                true
-            }
-            .doOnNext { data -> Log.i(TAG, "PushUpdated. machineID: $machineID, $data") }
-            .observeOn(AndroidSchedulers.mainThread())
+           // .observeOn(AndroidSchedulers.mainThread())
     }
 
     // for reference. another method to get text.
-    private fun readData(source: URL): String {
+    private fun readData(data: URL, layout: URL, push: URL): String {
         //Original file is encoded by "euc-kr"
-        val reader = BufferedReader(InputStreamReader(source.openStream(), "euc-kr"))
-        return reader.readLine()
+        Log.i(TAG, "readData. machineID: $machineID before")
+        var resultString:String? = null
+
+        val dataReader = BufferedReader(InputStreamReader(data.openStream(), "euc-kr"))
+        resultString = dataReader.readLine()
+        val layoutReader = BufferedReader(InputStreamReader(layout.openStream(), "euc-kr"))
+        resultString = resultString + ";" + layoutReader.readLine()
+        if (pushOn) {
+            val pushReader = BufferedReader(InputStreamReader(push.openStream(), "euc-kr"))
+            resultString = resultString + ";;" + pushReader.readLine()
+        }
+
+        Log.i(TAG, "readData. machineID: $machineID after")
+        return resultString
     }
 
     fun showState(ds: (Int, String) -> Unit, ps: (Int, String) -> Unit) {
@@ -147,18 +103,18 @@ class MachineData(val machineID: Int) {
 
         dataSubscriber = ds
         pushSubscriber = ps
+
         // SAM(Single Abstract Method) ambiguity issue.
         // so use io.reactivex.rxkotlin.Observables
         // or zip(.., .., BiFunction<String, String,String>{.., .. -> ..})
-        dataDisposable =
-            Observables.zip(dObservable, lObservale) { data, layout -> "$data;$layout" }
+        dataDisposable = dObservable
                 .subscribe { data ->
-                    dataSubscriber(machineID, data)
+                    val datas = data.split(";;")
+                    dataSubscriber(machineID, datas[0])
+                    if (datas.size > 1) {
+                        pushSubscriber(machineID, datas[1])
+                    }
                 }
-        if (pushOn)
-            pushDisposable = pObservale.subscribe { data ->
-                pushSubscriber(machineID, data)
-            }
     }
 
     fun updateSetting(address: String, code: String, time: Long, push: Boolean) {
@@ -181,9 +137,6 @@ class MachineData(val machineID: Int) {
         Log.i(TAG, "clear machineID: $machineID")
         if (::dataDisposable.isInitialized) {
             if (!dataDisposable.isDisposed) dataDisposable.dispose()
-        }
-        if (::pushDisposable.isInitialized) {
-            if (!pushDisposable.isDisposed) pushDisposable.dispose()
         }
 
         if (::dataSubscriber.isInitialized) {
